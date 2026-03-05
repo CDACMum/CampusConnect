@@ -1,0 +1,2425 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>BDA Interview Cell — Dashboard</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Sora:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <style>
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0
+        }
+
+        :root {
+            --bg: #070b14;
+            --surf: #0d1422;
+            --card: #111827;
+            --card2: #161d2b;
+            --in: #6366f1;
+            --pu: #a78bfa;
+            --bl: #38bdf8;
+            --cy: #22d3ee;
+            --gr: #34d399;
+            --rd: #f87171;
+            --am: #fbbf24;
+            --tx: #f1f5f9;
+            --t2: #94a3b8;
+            --t3: #1e293b;
+            --bi: rgba(99, 102, 241, .22);
+            --bi2: rgba(99, 102, 241, .09);
+            --bdim: rgba(99, 102, 241, .13);
+            --mono: 'JetBrains Mono', monospace;
+            --sans: 'Sora', sans-serif
+        }
+
+        body {
+            font-family: var(--sans);
+            background: var(--bg);
+            color: var(--tx);
+            min-height: 100vh
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            z-index: 0;
+            pointer-events: none;
+            background-image: linear-gradient(rgba(99, 102, 241, .025) 1px, transparent 1px), linear-gradient(90deg, rgba(99, 102, 241, .025) 1px, transparent 1px);
+            background-size: 48px 48px
+        }
+
+        .wrap {
+            position: relative;
+            z-index: 1
+        }
+
+        header {
+            background: rgba(7, 11, 20, .92);
+            backdrop-filter: blur(14px);
+            border-bottom: 1px solid var(--bi);
+            padding: 0 24px;
+            height: 62px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 50
+        }
+
+        .hlogo {
+            display: flex;
+            align-items: center;
+            gap: 10px
+        }
+
+        .hico {
+            width: 34px;
+            height: 34px;
+            border-radius: 9px;
+            background: linear-gradient(135deg, var(--in), var(--pu));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem
+        }
+
+        .hlogo h1 {
+            font-size: .95rem;
+            font-weight: 800
+        }
+
+        .hlogo h1 em {
+            color: var(--in);
+            font-style: normal
+        }
+
+        .hright {
+            display: flex;
+            align-items: center;
+            gap: 9px
+        }
+
+        .live-pill {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(52, 211, 153, .08);
+            border: 1px solid rgba(52, 211, 153, .22);
+            padding: 5px 11px;
+            border-radius: 999px;
+            font-size: .72rem;
+            font-family: var(--mono);
+            color: var(--gr)
+        }
+
+        .ldot {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: var(--gr);
+            animation: blink 2s infinite
+        }
+
+        @keyframes blink {
+
+            0%,
+            100% {
+                opacity: 1
+            }
+
+            50% {
+                opacity: .3
+            }
+        }
+
+        .user-pill {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            background: var(--card2);
+            border: 1px solid var(--bi);
+            padding: 5px 12px 5px 5px;
+            border-radius: 999px
+        }
+
+        .uavatar {
+            width: 27px;
+            height: 27px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--in), var(--pu));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: .72rem;
+            color: #fff
+        }
+
+        .uname {
+            font-size: .78rem;
+            color: var(--tx);
+            font-weight: 600
+        }
+
+        .batch-pill {
+            font-size: .62rem;
+            font-family: var(--mono);
+            color: var(--pu);
+            background: rgba(167, 139, 250, .1);
+            border: 1px solid rgba(167, 139, 250, .25);
+            padding: 3px 9px;
+            border-radius: 999px
+        }
+
+        .btn-out {
+            padding: 6px 13px;
+            background: transparent;
+            border: 1px solid var(--bi2);
+            border-radius: 8px;
+            color: var(--t2);
+            font-size: .74rem;
+            cursor: pointer;
+            font-family: var(--sans);
+            transition: all .2s
+        }
+
+        .btn-out:hover {
+            border-color: var(--rd);
+            color: var(--rd)
+        }
+
+        #vbar {
+            background: rgba(13, 17, 23, .6);
+            border-bottom: 1px solid var(--bi2);
+            padding: 7px 24px;
+            display: flex;
+            align-items: center;
+            gap: 9px;
+            flex-wrap: wrap;
+            font-size: .7rem
+        }
+
+        .vlbl {
+            color: var(--t2);
+            font-family: var(--mono);
+            white-space: nowrap
+        }
+
+        .vchip {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            background: rgba(99, 102, 241, .06);
+            border: 1px solid var(--bi);
+            padding: 3px 8px;
+            border-radius: 999px;
+            color: var(--tx);
+            font-size: .68rem
+        }
+
+        .vchip.me {
+            background: rgba(52, 211, 153, .1);
+            border-color: rgba(52, 211, 153, .3);
+            color: var(--gr)
+        }
+
+        .vdot {
+            width: 5px;
+            height: 5px;
+            border-radius: 50%;
+            background: var(--gr)
+        }
+
+        #welcome {
+            background: linear-gradient(135deg, rgba(99, 102, 241, .13), rgba(167, 139, 250, .07), rgba(99, 102, 241, .05));
+            border-bottom: 1px solid var(--bi);
+            padding: 18px 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 14px;
+            flex-wrap: wrap
+        }
+
+        .wb-left {
+            display: flex;
+            align-items: center;
+            gap: 14px
+        }
+
+        .wb-av {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            flex-shrink: 0;
+            background: linear-gradient(135deg, var(--in), var(--pu));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.3rem;
+            font-weight: 800;
+            color: #fff;
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, .28)
+        }
+
+        .wb-name {
+            font-size: 1rem;
+            font-weight: 700;
+            margin-bottom: 5px
+        }
+
+        .wb-name span {
+            color: var(--in)
+        }
+
+        .wb-meta {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap
+        }
+
+        .wb-batch {
+            font-size: .63rem;
+            font-family: var(--mono);
+            background: rgba(167, 139, 250, .12);
+            border: 1px solid rgba(167, 139, 250, .3);
+            color: var(--pu);
+            padding: 3px 10px;
+            border-radius: 999px
+        }
+
+        .wb-sub {
+            font-size: .64rem;
+            color: var(--t2);
+            font-family: var(--mono)
+        }
+
+        .btn-cta {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            padding: 10px 18px;
+            background: linear-gradient(135deg, var(--in), var(--pu));
+            border: none;
+            border-radius: 10px;
+            color: #fff;
+            font-size: .82rem;
+            font-weight: 600;
+            cursor: pointer;
+            font-family: var(--sans);
+            transition: opacity .2s, transform .1s;
+            box-shadow: 0 4px 16px rgba(99, 102, 241, .3);
+            white-space: nowrap
+        }
+
+        .btn-cta:hover {
+            opacity: .88;
+            transform: translateY(-1px)
+        }
+
+        main {
+            max-width: 860px;
+            margin: 0 auto;
+            padding: 26px 16px 80px
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin-bottom: 20px
+        }
+
+        .stat {
+            border-radius: 16px;
+            padding: 16px 18px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: transform .2s
+        }
+
+        .stat:hover {
+            transform: translateY(-2px)
+        }
+
+        .s1 {
+            background: linear-gradient(135deg, rgba(99, 102, 241, .18), rgba(99, 102, 241, .07));
+            border: 1px solid rgba(99, 102, 241, .25)
+        }
+
+        .s2 {
+            background: linear-gradient(135deg, rgba(56, 189, 248, .18), rgba(56, 189, 248, .07));
+            border: 1px solid rgba(56, 189, 248, .25)
+        }
+
+        .s3 {
+            background: linear-gradient(135deg, rgba(52, 211, 153, .18), rgba(52, 211, 153, .07));
+            border: 1px solid rgba(52, 211, 153, .25)
+        }
+
+        .slbl {
+            font-size: .64rem;
+            color: var(--t2);
+            font-family: var(--mono);
+            text-transform: uppercase;
+            letter-spacing: .08em;
+            margin-bottom: 5px
+        }
+
+        .sval {
+            font-size: 2.1rem;
+            font-weight: 800;
+            letter-spacing: -.04em
+        }
+
+        .sval.i {
+            color: var(--in)
+        }
+
+        .sval.b {
+            color: var(--bl)
+        }
+
+        .sval.g {
+            color: var(--gr)
+        }
+
+        .sico {
+            font-size: 1.7rem;
+            opacity: .18
+        }
+
+        .tabs-row {
+            display: flex;
+            gap: 4px;
+            background: var(--card);
+            border: 1px solid var(--bi2);
+            padding: 5px;
+            border-radius: 13px;
+            margin-bottom: 20px
+        }
+
+        .tab {
+            flex: 1;
+            padding: 10px 6px;
+            border: none;
+            background: transparent;
+            color: var(--t2);
+            font-size: .78rem;
+            font-weight: 500;
+            cursor: pointer;
+            border-radius: 9px;
+            font-family: var(--sans);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            transition: all .18s
+        }
+
+        .tab:hover {
+            background: var(--card2);
+            color: var(--tx)
+        }
+
+        .tab.active {
+            background: linear-gradient(135deg, rgba(99, 102, 241, .2), rgba(167, 139, 250, .1));
+            color: var(--in);
+            border: 1px solid var(--bi);
+            font-weight: 700
+        }
+
+        .progress-wrap {
+            background: var(--card);
+            border: 1px solid var(--bi2);
+            border-radius: 16px;
+            padding: 20px 26px 16px;
+            margin-bottom: 14px
+        }
+
+        .prog-steps {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            position: relative
+        }
+
+        .prog-line {
+            position: absolute;
+            top: 17px;
+            left: 18px;
+            right: 18px;
+            height: 2px;
+            background: var(--bi2);
+            z-index: 0
+        }
+
+        .prog-fill {
+            position: absolute;
+            top: 17px;
+            left: 18px;
+            height: 2px;
+            background: linear-gradient(90deg, var(--in), var(--pu));
+            transition: width .4s ease;
+            z-index: 1
+        }
+
+        .snode {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 7px;
+            position: relative;
+            z-index: 2
+        }
+
+        .snc {
+            width: 34px;
+            height: 34px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: .72rem;
+            font-weight: 700;
+            font-family: var(--mono);
+            border: 2px solid var(--bi2);
+            background: var(--surf);
+            transition: all .3s
+        }
+
+        .snode.done .snc {
+            background: var(--in);
+            border-color: var(--in);
+            color: #fff
+        }
+
+        .snode.active .snc {
+            background: var(--bdim);
+            border-color: var(--in);
+            color: var(--in);
+            box-shadow: 0 0 0 4px rgba(99, 102, 241, .12)
+        }
+
+        .snode.idle .snc {
+            color: var(--t2)
+        }
+
+        .snl {
+            font-size: .62rem;
+            color: var(--t2);
+            font-family: var(--mono);
+            text-align: center;
+            white-space: nowrap
+        }
+
+        .snode.active .snl {
+            color: var(--in)
+        }
+
+        .snode.done .snl {
+            color: var(--gr)
+        }
+
+        .spanel {
+            display: none
+        }
+
+        .spanel.active {
+            display: block;
+            animation: fadeUp .25s ease
+        }
+
+        @keyframes fadeUp {
+            from {
+                opacity: 0;
+                transform: translateY(8px)
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0)
+            }
+        }
+
+        .sbox {
+            background: var(--card);
+            border: 1px solid var(--bi2);
+            border-radius: 18px;
+            padding: 26px
+        }
+
+        .stitle {
+            font-size: 1.05rem;
+            font-weight: 700;
+            margin-bottom: 4px;
+            display: flex;
+            align-items: center;
+            gap: 8px
+        }
+
+        .ssub {
+            font-size: .71rem;
+            color: var(--t2);
+            margin-bottom: 10px;
+            font-family: var(--mono)
+        }
+
+        .tip-box {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            background: rgba(99, 102, 241, .06);
+            border: 1px solid var(--bi);
+            border-radius: 10px;
+            padding: 10px 13px;
+            margin-bottom: 18px
+        }
+
+        .tip-ico {
+            font-size: .95rem;
+            flex-shrink: 0;
+            margin-top: 1px
+        }
+
+        .tip-txt {
+            font-size: .74rem;
+            color: var(--t2);
+            line-height: 1.6
+        }
+
+        .tip-txt strong {
+            color: var(--in)
+        }
+
+        .fgrid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 13px
+        }
+
+        .field {
+            display: flex;
+            flex-direction: column;
+            gap: 6px
+        }
+
+        .field label {
+            font-size: .66rem;
+            color: var(--t2);
+            font-family: var(--mono);
+            text-transform: uppercase;
+            letter-spacing: .08em
+        }
+
+        .field label .rq {
+            color: var(--in)
+        }
+
+        .fin {
+            padding: 11px 13px;
+            background: var(--surf);
+            border: 1.5px solid var(--bi2);
+            border-radius: 10px;
+            color: var(--tx);
+            font-size: .88rem;
+            font-family: var(--sans);
+            outline: none;
+            transition: border-color .2s, box-shadow .2s;
+            width: 100%
+        }
+
+        .fin:focus {
+            border-color: var(--in);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, .1)
+        }
+
+        .fin::placeholder {
+            color: var(--t3)
+        }
+
+        .fin[readonly] {
+            background: rgba(99, 102, 241, .05);
+            color: var(--t2);
+            cursor: default
+        }
+
+        textarea.fin {
+            resize: vertical;
+            min-height: 130px;
+            line-height: 1.8
+        }
+
+        .batch-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            font-size: .78rem;
+            background: rgba(167, 139, 250, .1);
+            border: 1px solid rgba(167, 139, 250, .25);
+            color: var(--pu);
+            padding: 8px 14px;
+            border-radius: 9px;
+            font-family: var(--mono)
+        }
+
+        .ferr {
+            display: none;
+            background: rgba(248, 113, 113, .1);
+            border: 1px solid rgba(248, 113, 113, .3);
+            color: var(--rd);
+            border-radius: 8px;
+            padding: 10px 14px;
+            font-size: .78rem;
+            margin-bottom: 12px
+        }
+
+        hr.dv {
+            border: none;
+            border-top: 1px solid var(--bi2);
+            margin: 13px 0
+        }
+
+        .rnd-hdr {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 11px
+        }
+
+        .rnd-lbl {
+            font-size: .71rem;
+            font-weight: 600;
+            color: var(--in);
+            font-family: var(--mono)
+        }
+
+        .btn-addr {
+            padding: 7px 13px;
+            background: var(--bdim);
+            border: 1px solid var(--bi);
+            border-radius: 8px;
+            color: var(--in);
+            font-size: .71rem;
+            font-weight: 600;
+            cursor: pointer;
+            font-family: var(--sans);
+            transition: all .2s
+        }
+
+        .btn-addr:hover {
+            background: rgba(99, 102, 241, .22)
+        }
+
+        .rcard {
+            background: var(--surf);
+            border: 1px solid var(--bi2);
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 9px
+        }
+
+        .rcardh {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 11px
+        }
+
+        .rtag {
+            font-family: var(--mono);
+            font-size: .66rem;
+            font-weight: 600;
+            color: var(--in);
+            background: var(--bdim);
+            border: 1px solid var(--bi);
+            padding: 3px 9px;
+            border-radius: 5px
+        }
+
+        .btn-del {
+            background: none;
+            border: none;
+            color: var(--rd);
+            opacity: .55;
+            cursor: pointer;
+            font-size: .71rem
+        }
+
+        .btn-del:hover {
+            opacity: 1
+        }
+
+        .rfields {
+            display: flex;
+            flex-direction: column;
+            gap: 9px
+        }
+
+        .snav {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px
+        }
+
+        .btn-back {
+            padding: 11px 20px;
+            background: transparent;
+            border: 1px solid var(--bi);
+            border-radius: 10px;
+            color: var(--t2);
+            font-size: .84rem;
+            font-weight: 600;
+            cursor: pointer;
+            font-family: var(--sans);
+            transition: all .2s
+        }
+
+        .btn-back:hover {
+            color: var(--tx);
+            border-color: var(--in)
+        }
+
+        .btn-next {
+            flex: 1;
+            padding: 12px 20px;
+            background: linear-gradient(135deg, var(--in), var(--pu));
+            border: none;
+            border-radius: 10px;
+            color: #fff;
+            font-size: .88rem;
+            font-weight: 700;
+            cursor: pointer;
+            font-family: var(--sans);
+            transition: opacity .2s, transform .1s;
+            box-shadow: 0 4px 14px rgba(99, 102, 241, .3)
+        }
+
+        .btn-next:hover {
+            opacity: .88;
+            transform: translateY(-1px)
+        }
+
+        .btn-final {
+            flex: 1;
+            padding: 12px 20px;
+            background: linear-gradient(135deg, #16a34a, #0d9488);
+            border: none;
+            border-radius: 10px;
+            color: #fff;
+            font-size: .88rem;
+            font-weight: 700;
+            cursor: pointer;
+            font-family: var(--sans);
+            transition: opacity .2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px
+        }
+
+        .btn-final:hover {
+            opacity: .88
+        }
+
+        .btn-final:disabled {
+            opacity: .5;
+            cursor: not-allowed
+        }
+
+        .rev-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 11px;
+            margin-bottom: 14px
+        }
+
+        .rev-item {
+            display: flex;
+            flex-direction: column;
+            gap: 4px
+        }
+
+        .rev-lbl {
+            font-size: .64rem;
+            color: var(--t2);
+            font-family: var(--mono);
+            text-transform: uppercase;
+            letter-spacing: .08em
+        }
+
+        .rev-val {
+            font-size: .88rem;
+            font-weight: 600
+        }
+
+        .rev-round {
+            border-left: 2px solid var(--in);
+            padding: 9px 13px;
+            margin-bottom: 7px;
+            background: rgba(99, 102, 241, .04);
+            border-radius: 0 8px 8px 0
+        }
+
+        .rev-rn {
+            font-size: .71rem;
+            font-weight: 600;
+            color: var(--pu);
+            font-family: var(--mono);
+            margin-bottom: 4px
+        }
+
+        .rev-qs {
+            font-size: .82rem;
+            color: var(--tx);
+            white-space: pre-line;
+            line-height: 1.7
+        }
+
+        .sechdr {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+            flex-wrap: wrap;
+            gap: 10px
+        }
+
+        .sectitle {
+            font-size: 1rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 7px
+        }
+
+        .badge {
+            font-size: .64rem;
+            font-family: var(--mono);
+            background: var(--bdim);
+            border: 1px solid var(--bi);
+            color: var(--in);
+            padding: 2px 7px;
+            border-radius: 5px
+        }
+
+        .sec-btns {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap
+        }
+
+        .btn-xl {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 14px;
+            background: rgba(52, 211, 153, .1);
+            border: 1px solid rgba(52, 211, 153, .28);
+            border-radius: 9px;
+            color: var(--gr);
+            font-size: .75rem;
+            font-weight: 600;
+            cursor: pointer;
+            font-family: var(--sans);
+            transition: all .2s
+        }
+
+        .btn-xl:hover {
+            background: rgba(52, 211, 153, .18)
+        }
+
+        .ecard {
+            background: var(--card);
+            border: 1px solid var(--bi2);
+            border-radius: 16px;
+            padding: 18px;
+            margin-bottom: 12px;
+            transition: border-color .2s, transform .2s
+        }
+
+        .ecard:hover {
+            border-color: var(--bi);
+            transform: translateY(-1px)
+        }
+
+        .etop {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 12px;
+            flex-wrap: wrap;
+            gap: 8px
+        }
+
+        .eco-wrap {
+            display: flex;
+            align-items: center;
+            gap: 11px
+        }
+
+        .eco-av {
+            width: 42px;
+            height: 42px;
+            border-radius: 11px;
+            flex-shrink: 0;
+            background: linear-gradient(135deg, rgba(99, 102, 241, .3), rgba(167, 139, 250, .2));
+            border: 1px solid var(--bi);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
+            font-weight: 800;
+            color: var(--in)
+        }
+
+        .eco {
+            font-size: 1rem;
+            font-weight: 700
+        }
+
+        .epos {
+            display: inline-flex;
+            font-size: .67rem;
+            font-family: var(--mono);
+            background: rgba(56, 189, 248, .1);
+            border: 1px solid rgba(56, 189, 248, .25);
+            color: var(--bl);
+            padding: 3px 8px;
+            border-radius: 999px;
+            margin-top: 3px
+        }
+
+        .emeta {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 4px
+        }
+
+        .emeta-date {
+            font-size: .7rem;
+            color: var(--t2);
+            font-family: var(--mono)
+        }
+
+        .emeta-st {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: .7rem;
+            color: var(--t2)
+        }
+
+        .smav {
+            width: 19px;
+            height: 19px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--in), var(--pu));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: .55rem;
+            font-weight: 700;
+            color: #fff
+        }
+
+        .round-acc {
+            display: flex;
+            flex-direction: column;
+            gap: 5px
+        }
+
+        .round-item {
+            background: var(--surf);
+            border: 1px solid var(--bi2);
+            border-radius: 9px;
+            overflow: hidden
+        }
+
+        .round-hdr {
+            padding: 9px 13px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: background .15s
+        }
+
+        .round-hdr:hover {
+            background: rgba(99, 102, 241, .05)
+        }
+
+        .round-ttl {
+            font-size: .79rem;
+            font-weight: 600;
+            color: var(--pu);
+            font-family: var(--mono)
+        }
+
+        .round-tog {
+            font-size: .68rem;
+            color: var(--t2);
+            transition: transform .2s
+        }
+
+        .round-tog.open {
+            transform: rotate(180deg)
+        }
+
+        .round-bdy {
+            display: none;
+            padding: 0 13px 11px
+        }
+
+        .round-bdy.open {
+            display: block;
+            animation: fadeUp .15s ease
+        }
+
+        .round-qs {
+            font-size: .82rem;
+            color: var(--t2);
+            white-space: pre-line;
+            line-height: 1.8
+        }
+
+        .map-controls {
+            display: flex;
+            gap: 9px;
+            margin-bottom: 14px;
+            flex-wrap: wrap
+        }
+
+        .search-wrap {
+            flex: 1;
+            min-width: 160px
+        }
+
+        .map-search {
+            width: 100%;
+            padding: 10px 13px;
+            background: var(--surf);
+            border: 1.5px solid var(--bi2);
+            border-radius: 10px;
+            color: var(--tx);
+            font-size: .84rem;
+            font-family: var(--sans);
+            outline: none;
+            transition: border-color .2s
+        }
+
+        .map-search:focus {
+            border-color: var(--in)
+        }
+
+        .map-search::placeholder {
+            color: var(--t3)
+        }
+
+        .map-select {
+            padding: 10px 13px;
+            background: var(--surf);
+            border: 1.5px solid var(--bi2);
+            border-radius: 10px;
+            color: var(--tx);
+            font-size: .82rem;
+            font-family: var(--sans);
+            outline: none;
+            cursor: pointer;
+            min-width: 140px
+        }
+
+        .btn-sort {
+            padding: 10px 14px;
+            background: var(--bdim);
+            border: 1px solid var(--bi);
+            border-radius: 10px;
+            color: var(--in);
+            font-size: .79rem;
+            font-weight: 600;
+            cursor: pointer;
+            font-family: var(--sans);
+            transition: all .2s;
+            white-space: nowrap
+        }
+
+        .btn-sort:hover {
+            background: rgba(99, 102, 241, .2)
+        }
+
+        .map-summary {
+            display: flex;
+            gap: 9px;
+            margin-bottom: 14px;
+            flex-wrap: wrap
+        }
+
+        .map-chip {
+            font-size: .72rem;
+            font-family: var(--mono);
+            color: var(--t2);
+            background: var(--card);
+            border: 1px solid var(--bi2);
+            padding: 5px 11px;
+            border-radius: 999px
+        }
+
+        .map-chip strong {
+            color: var(--tx)
+        }
+
+        .cgrid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 13px
+        }
+
+        .ccard {
+            background: var(--card);
+            border: 1px solid var(--bi2);
+            border-radius: 16px;
+            overflow: hidden;
+            transition: transform .2s, border-color .2s;
+            animation: fadeUp .3s ease both
+        }
+
+        .ccard:hover {
+            transform: translateY(-2px);
+            border-color: var(--bi)
+        }
+
+        .ccard-head {
+            padding: 14px 16px;
+            background: linear-gradient(135deg, rgba(99, 102, 241, .18), rgba(167, 139, 250, .1));
+            border-bottom: 1px solid var(--bi2)
+        }
+
+        .ccard-co {
+            display: flex;
+            align-items: center;
+            gap: 11px;
+            margin-bottom: 7px
+        }
+
+        .ccard-ico {
+            width: 36px;
+            height: 36px;
+            border-radius: 9px;
+            background: linear-gradient(135deg, var(--in), var(--pu));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+            font-weight: 800;
+            color: #fff;
+            flex-shrink: 0
+        }
+
+        .ccard-name {
+            font-size: .96rem;
+            font-weight: 700
+        }
+
+        .ccard-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px
+        }
+
+        .ccard-badge {
+            font-size: .63rem;
+            font-family: var(--mono);
+            background: rgba(52, 211, 153, .12);
+            border: 1px solid rgba(52, 211, 153, .25);
+            color: var(--gr);
+            padding: 3px 8px;
+            border-radius: 999px
+        }
+
+        .ccard-role {
+            font-size: .61rem;
+            font-family: var(--mono);
+            background: rgba(56, 189, 248, .1);
+            border: 1px solid rgba(56, 189, 248, .2);
+            color: var(--bl);
+            padding: 3px 8px;
+            border-radius: 999px
+        }
+
+        .ccard-body {
+            padding: 13px 16px
+        }
+
+        .ccard-lbl {
+            font-size: .6rem;
+            color: var(--t2);
+            font-family: var(--mono);
+            text-transform: uppercase;
+            letter-spacing: .08em;
+            margin-bottom: 9px
+        }
+
+        .student-chips {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px
+        }
+
+        .schip {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: var(--surf);
+            border: 1px solid var(--bi2);
+            border-radius: 999px;
+            padding: 4px 11px 4px 4px;
+            font-size: .74rem;
+            transition: all .15s
+        }
+
+        .schip:hover {
+            border-color: var(--bi);
+            background: var(--card2)
+        }
+
+        .schip-av {
+            width: 21px;
+            height: 21px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--in), var(--pu));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: .56rem;
+            font-weight: 700;
+            color: #fff;
+            flex-shrink: 0
+        }
+
+        .loading {
+            text-align: center;
+            padding: 42px;
+            color: var(--t2);
+            font-family: var(--mono);
+            font-size: .8rem
+        }
+
+        .spinner {
+            display: inline-block;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            border: 2px solid var(--bi2);
+            border-top-color: var(--in);
+            animation: spin .8s linear infinite;
+            margin-bottom: 10px
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg)
+            }
+        }
+
+        .empty {
+            text-align: center;
+            padding: 44px 20px;
+            color: var(--t2)
+        }
+
+        .eico {
+            font-size: 2.5rem;
+            opacity: .2;
+            margin-bottom: 10px
+        }
+
+        .empty p {
+            font-size: .84rem
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 22px;
+            left: 50%;
+            transform: translateX(-50%) translateY(70px);
+            z-index: 9999;
+            padding: 12px 20px;
+            border-radius: 11px;
+            font-size: .82rem;
+            font-weight: 600;
+            opacity: 0;
+            transition: all .3s cubic-bezier(.175, .885, .32, 1.275);
+            pointer-events: none;
+            white-space: nowrap
+        }
+
+        .toast.ok {
+            background: #052e16;
+            border: 1px solid #16a34a;
+            color: #4ade80
+        }
+
+        .toast.err {
+            background: #1f0707;
+            border: 1px solid #dc2626;
+            color: #f87171
+        }
+
+        .toast.show {
+            transform: translateX(-50%) translateY(0);
+            opacity: 1
+        }
+
+        .hidden {
+            display: none !important
+        }
+
+        #ai-btn {
+            position: fixed;
+            bottom: 26px;
+            right: 26px;
+            z-index: 100;
+            width: 52px;
+            height: 52px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #7c3aed, #a855f7);
+            border: none;
+            cursor: pointer;
+            font-size: 1.4rem;
+            box-shadow: 0 8px 28px rgba(124, 58, 237, .45);
+            transition: transform .2s, box-shadow .2s;
+            display: flex;
+            align-items: center;
+            justify-content: center
+        }
+
+        #ai-btn:hover {
+            transform: scale(1.09);
+            box-shadow: 0 12px 36px rgba(124, 58, 237, .55)
+        }
+
+        #ai-panel {
+            position: fixed;
+            bottom: 90px;
+            right: 26px;
+            z-index: 99;
+            width: 320px;
+            max-height: 510px;
+            background: #0f0b1e;
+            border: 1px solid rgba(124, 58, 237, .35);
+            border-radius: 18px;
+            display: none;
+            flex-direction: column;
+            overflow: hidden;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, .6);
+            animation: slideUp .3s cubic-bezier(.16, 1, .3, 1)
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(16px)
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0)
+            }
+        }
+
+        #ai-panel.open {
+            display: flex
+        }
+
+        .ai-hdr {
+            padding: 12px 14px;
+            border-bottom: 1px solid rgba(124, 58, 237, .2);
+            background: linear-gradient(135deg, rgba(124, 58, 237, .15), rgba(168, 85, 247, .07));
+            display: flex;
+            align-items: center;
+            justify-content: space-between
+        }
+
+        .ai-hdr-l {
+            display: flex;
+            align-items: center;
+            gap: 8px
+        }
+
+        .ai-ico-wrap {
+            position: relative;
+            font-size: 1.1rem
+        }
+
+        .ai-live {
+            position: absolute;
+            top: -2px;
+            right: -2px;
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: #a855f7;
+            animation: blink 1.5s infinite
+        }
+
+        .ai-title {
+            font-size: .84rem;
+            font-weight: 700;
+            color: #e9d5ff
+        }
+
+        .ai-badge {
+            font-size: .58rem;
+            font-family: var(--mono);
+            color: #7c3aed;
+            background: rgba(124, 58, 237, .15);
+            border: 1px solid rgba(124, 58, 237, .3);
+            padding: 2px 7px;
+            border-radius: 4px
+        }
+
+        .ai-close {
+            background: none;
+            border: none;
+            color: #7c3aed;
+            cursor: pointer;
+            font-size: .95rem;
+            padding: 4px
+        }
+
+        .ai-close:hover {
+            color: #a855f7
+        }
+
+        .ai-body {
+            flex: 1;
+            overflow-y: auto;
+            padding: 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 9px
+        }
+
+        .ai-body::-webkit-scrollbar {
+            width: 3px
+        }
+
+        .ai-body::-webkit-scrollbar-track {
+            background: transparent
+        }
+
+        .ai-body::-webkit-scrollbar-thumb {
+            background: rgba(124, 58, 237, .3);
+            border-radius: 2px
+        }
+
+        .ai-idle {
+            text-align: center;
+            padding: 18px 10px;
+            color: rgba(167, 139, 250, .45);
+            font-size: .76rem;
+            font-family: var(--mono)
+        }
+
+        .ai-idle .ai-big {
+            font-size: 2rem;
+            margin-bottom: 8px
+        }
+
+        .ai-section-lbl {
+            font-size: .58rem;
+            text-transform: uppercase;
+            letter-spacing: .1em;
+            color: #7c3aed;
+            font-family: var(--mono);
+            font-weight: 700;
+            margin-bottom: 4px
+        }
+
+        .ai-bubble {
+            background: rgba(124, 58, 237, .12);
+            border: 1px solid rgba(124, 58, 237, .2);
+            border-radius: 9px;
+            padding: 9px 11px;
+            font-size: .77rem;
+            color: #ddd6fe;
+            line-height: 1.65
+        }
+
+        .ai-bubble.ok {
+            background: rgba(34, 197, 94, .08);
+            border-color: rgba(34, 197, 94, .2);
+            color: #86efac
+        }
+
+        .ai-followup {
+            background: rgba(167, 139, 250, .06);
+            border: 1px solid rgba(167, 139, 250, .15);
+            border-radius: 7px;
+            padding: 7px 10px;
+            font-size: .74rem;
+            color: #ddd6fe;
+            line-height: 1.5;
+            cursor: pointer;
+            transition: background .15s
+        }
+
+        .ai-followup:hover {
+            background: rgba(167, 139, 250, .12)
+        }
+
+        .ai-followup::before {
+            content: '→ ';
+            color: #a855f7
+        }
+
+        .ai-thinking {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            font-size: .74rem;
+            color: #7c3aed;
+            font-family: var(--mono)
+        }
+
+        .ai-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: #7c3aed;
+            animation: blink .8s infinite
+        }
+
+        .ai-dot:nth-child(2) {
+            animation-delay: .2s
+        }
+
+        .ai-dot:nth-child(3) {
+            animation-delay: .4s
+        }
+
+        .ai-chat-msgs {
+            flex: 1;
+            overflow-y: auto;
+            padding: 8px 0;
+            display: flex;
+            flex-direction: column;
+            gap: 7px;
+            max-height: 120px
+        }
+
+        .chat-user {
+            background: rgba(99, 102, 241, .18);
+            border: 1px solid rgba(99, 102, 241, .25);
+            border-radius: 8px 8px 2px 8px;
+            padding: 7px 10px;
+            font-size: .74rem;
+            color: #e0e7ff;
+            align-self: flex-end;
+            max-width: 85%
+        }
+
+        .chat-ai {
+            background: rgba(124, 58, 237, .14);
+            border: 1px solid rgba(124, 58, 237, .22);
+            border-radius: 8px 8px 8px 2px;
+            padding: 7px 10px;
+            font-size: .74rem;
+            color: #ddd6fe;
+            align-self: flex-start;
+            max-width: 90%;
+            line-height: 1.55
+        }
+
+        .ai-input-row {
+            display: flex;
+            gap: 7px;
+            padding: 10px 12px;
+            border-top: 1px solid rgba(124, 58, 237, .18)
+        }
+
+        .ai-input {
+            flex: 1;
+            padding: 8px 11px;
+            background: rgba(124, 58, 237, .1);
+            border: 1px solid rgba(124, 58, 237, .25);
+            border-radius: 8px;
+            color: #e9d5ff;
+            font-size: .76rem;
+            font-family: var(--sans);
+            outline: none
+        }
+
+        .ai-input:focus {
+            border-color: rgba(168, 85, 247, .5)
+        }
+
+        .ai-input::placeholder {
+            color: rgba(167, 139, 250, .4)
+        }
+
+        .ai-send {
+            padding: 8px 12px;
+            background: linear-gradient(135deg, #7c3aed, #a855f7);
+            border: none;
+            border-radius: 8px;
+            color: #fff;
+            font-size: .78rem;
+            cursor: pointer;
+            font-family: var(--sans);
+            font-weight: 600;
+            transition: opacity .2s
+        }
+
+        .ai-send:hover {
+            opacity: .85
+        }
+
+        @media(max-width:580px) {
+
+            .fgrid,
+            .stats,
+            .rev-grid {
+                grid-template-columns: 1fr
+            }
+
+            .tabs-row {
+                flex-direction: column
+            }
+
+            .snl {
+                display: none
+            }
+
+            #ai-panel {
+                width: calc(100vw - 32px);
+                right: 16px
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="wrap">
+        <header>
+            <div class="hlogo">
+                <div class="hico">🗄️</div>
+                <h1>BDA Interview <em>Cell</em></h1>
+            </div>
+            <div class="hright">
+                <div class="live-pill">
+                    <div class="ldot"></div><span id="hvc">0</span>&nbsp;online
+                </div>
+                <div class="user-pill">
+                    <div class="uavatar" id="uav">?</div><span class="uname" id="uname">—</span>
+                </div>
+                <span class="batch-pill" id="bpill" style="display:none"></span>
+                <button class="btn-out" onclick="doLogout()">⏏ Logout</button>
+            </div>
+        </header>
+
+        <div id="vbar"><span class="vlbl">👁 Viewing now →</span>
+            <div id="vchips"></div>
+        </div>
+
+        <div id="welcome">
+            <div class="wb-left">
+                <div class="wb-av" id="wb-av">?</div>
+                <div>
+                    <div class="wb-name">Welcome back, <span id="wb-name">Student</span> 👋</div>
+                    <div class="wb-meta">
+                        <span class="wb-batch" id="wb-batch" style="display:none"></span>
+                        <span class="wb-sub" id="wb-sub">Loading your stats...</span>
+                    </div>
+                    <div style="font-size:.68rem;color:var(--t2);margin-top:4px;font-family:var(--mono)">Help your
+                        juniors ace their interviews — share what was asked! 🚀</div>
+                </div>
+            </div>
+            <button class="btn-cta" onclick="sw('submit',document.getElementById('tbtn-s'))">✍️ Share
+                Experience</button>
+        </div>
+
+        <main>
+            <div class="stats">
+                <div class="stat s1">
+                    <div>
+                        <div class="slbl">Total Submissions</div>
+                        <div class="sval i" id="stotal">0</div>
+                    </div>
+                    <div class="sico">📋</div>
+                </div>
+                <div class="stat s2">
+                    <div>
+                        <div class="slbl">Companies Covered</div>
+                        <div class="sval b" id="sco">0</div>
+                    </div>
+                    <div class="sico">🏢</div>
+                </div>
+                <div class="stat s3">
+                    <div>
+                        <div class="slbl">Students Online</div>
+                        <div class="sval g" id="sonline">0</div>
+                    </div>
+                    <div class="sico">🟢</div>
+                </div>
+            </div>
+
+            <div class="tabs-row">
+                <button class="tab active" id="tbtn-s" onclick="sw('submit',this)">✍️ Share My Interview</button>
+                <button class="tab" id="tbtn-a" onclick="sw('all',this)">📖 Question Bank</button>
+                <button class="tab" id="tbtn-m" onclick="sw('students',this)">🏢 Company Map</button>
+            </div>
+
+            <!-- SUBMIT WIZARD -->
+            <div id="tab-submit">
+                <div class="progress-wrap">
+                    <div class="prog-steps">
+                        <div class="prog-line"></div>
+                        <div class="prog-fill" id="pfill" style="width:0%"></div>
+                        <div class="snode active" id="sn0">
+                            <div class="snc">01</div>
+                            <div class="snl">About You</div>
+                        </div>
+                        <div class="snode idle" id="sn1">
+                            <div class="snc">02</div>
+                            <div class="snl">First Round</div>
+                        </div>
+                        <div class="snode idle" id="sn2">
+                            <div class="snc">03</div>
+                            <div class="snl">More Rounds</div>
+                        </div>
+                        <div class="snode idle" id="sn3">
+                            <div class="snc">04</div>
+                            <div class="snl">Review</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="spanel active" id="sp0">
+                    <div class="sbox">
+                        <div class="stitle">👤 Tell us about yourself</div>
+                        <div class="ssub">// STEP 1 — Your details are pre-filled from your account</div>
+                        <div class="tip-box">
+                            <div class="tip-ico">💡</div>
+                            <div class="tip-txt">Your <strong>name and batch</strong> are auto-filled. Just tell us
+                                which <strong>company</strong> interviewed you and the <strong>role</strong> you applied
+                                for!</div>
+                        </div>
+                        <div class="ferr" id="e0"></div>
+                        <div class="fgrid">
+                            <div class="field"><label>Your Full Name <span class="rq">*</span></label><input class="fin"
+                                    id="fn" type="text" readonly /></div>
+                            <div class="field"><label>Your Batch</label>
+                                <div class="batch-badge" id="batch-disp">—</div>
+                            </div>
+                            <div class="field"><label>Company Name <span class="rq">*</span></label><input class="fin"
+                                    id="fc" type="text" placeholder="e.g., Amazon, TCS, Infosys" /></div>
+                            <div class="field"><label>Position / Role <span class="rq">*</span></label><input
+                                    class="fin" id="fp" type="text" placeholder="e.g., Data Engineer, Analyst" /></div>
+                        </div>
+                        <div class="snav"><button class="btn-next" onclick="goStep(1)">Continue → Round Details</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="spanel" id="sp1">
+                    <div class="sbox">
+                        <div class="stitle">🎯 First Interview Round</div>
+                        <div class="ssub">// STEP 2 — Share the questions asked in the first round</div>
+                        <div class="tip-box">
+                            <div class="tip-ico">🤖</div>
+                            <div class="tip-txt">The <strong>AI Assistant</strong> (🤖 button bottom-right) checks your
+                                grammar and suggests <strong>likely follow-up questions</strong> — helping future
+                                batches prepare better!</div>
+                        </div>
+                        <div class="ferr" id="e1"></div>
+                        <div class="rfields">
+                            <div class="field"><label>Round Name <span class="rq">*</span></label><input class="fin"
+                                    id="r1n" type="text" placeholder="e.g., Aptitude Test / Technical Round 1 / HR" />
+                            </div>
+                            <div class="field"><label>Questions Asked <span class="rq">*</span></label><textarea
+                                    class="fin" id="r1q" rows="8"
+                                    placeholder="Write each question on a new line:&#10;&#10;1. What is the difference between OLAP and OLTP?&#10;2. Explain Spark RDD vs DataFrame&#10;3. What is data partitioning in Hive?"
+                                    oninput="onQChange(this)"></textarea></div>
+                        </div>
+                        <div class="snav"><button class="btn-back" onclick="goStep(0)">← Back</button><button
+                                class="btn-next" onclick="goStep(2)">Continue → More Rounds</button></div>
+                    </div>
+                </div>
+
+                <div class="spanel" id="sp2">
+                    <div class="sbox">
+                        <div class="stitle">🔁 Additional Rounds</div>
+                        <div class="ssub">// STEP 3 — Add more rounds (HR, System Design, GD etc.)</div>
+                        <div class="tip-box">
+                            <div class="tip-ico">✅</div>
+                            <div class="tip-txt">Had an <strong>HR round, System Design, or Group Discussion?</strong>
+                                Add all rounds — the more detail you share, the more helpful it is for your batchmates!
+                            </div>
+                        </div>
+                        <div class="rnd-hdr"><span class="rnd-lbl">// EXTRA ROUNDS</span><button type="button"
+                                class="btn-addr" onclick="addExtraRound()">+ Add Round</button></div>
+                        <div id="xrounds">
+                            <div class="empty" style="padding:20px 0" id="xempty">
+                                <div class="eico" style="font-size:1.8rem">➕</div>
+                                <p>Click "Add Round" to add Technical Round 2, HR, Managerial, or System Design round
+                                </p>
+                            </div>
+                        </div>
+                        <div class="snav"><button class="btn-back" onclick="goStep(1)">← Back</button><button
+                                class="btn-next" onclick="goStep(3)">Continue → Review</button></div>
+                    </div>
+                </div>
+
+                <div class="spanel" id="sp3">
+                    <div class="sbox">
+                        <div class="stitle">✅ Review &amp; Submit</div>
+                        <div class="ssub">// FINAL STEP — Double-check everything before saving to the database</div>
+                        <div id="rev"></div>
+                        <div class="snav"><button class="btn-back" onclick="goStep(2)">← Edit</button><button
+                                class="btn-final" id="finalBtn" onclick="doSubmit()">🚀 Save to Database</button></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ALL SUBMISSIONS -->
+            <div id="tab-all" class="hidden">
+                <div class="sechdr">
+                    <div class="sectitle">📖 Interview Question Bank <span class="badge" id="allc">0</span></div>
+                    <div class="sec-btns"><button class="btn-xl" onclick="loadAndRenderAll()">🔄 Refresh</button><button
+                            class="btn-xl" onclick="exportExcel()">📊 Export Excel</button></div>
+                </div>
+                <div class="map-controls" style="margin-bottom:12px">
+                    <div class="search-wrap"><input type="text" class="map-search" id="qbSearch"
+                            placeholder="🔍 Search by company, student, or keyword..." oninput="filterQuestionBank()" />
+                    </div>
+                    <select class="map-select" id="qbRoleFilter" onchange="filterQuestionBank()">
+                        <option value="">All Roles</option>
+                    </select>
+                </div>
+                <div id="alist">
+                    <div class="loading">
+                        <div class="spinner"></div><br>Loading interview experiences...
+                    </div>
+                </div>
+            </div>
+
+            <!-- COMPANY MAP -->
+            <div id="tab-students" class="hidden">
+                <div class="sechdr">
+                    <div class="sectitle">🏢 Company–Student Map</div>
+                    <div class="sec-btns"><button class="btn-xl" onclick="loadAndRenderMap()">🔄 Refresh</button><button
+                            class="btn-xl" onclick="exportExcel()">📊 Export Excel</button></div>
+                </div>
+                <div class="map-controls">
+                    <div class="search-wrap"><input type="text" class="map-search" id="mapSearch"
+                            placeholder="Search companies..." oninput="applyMapFilters()" /></div>
+                    <select class="map-select" id="roleFilter" onchange="applyMapFilters()">
+                        <option value="">All Job Roles</option>
+                    </select>
+                    <button class="btn-sort" id="sortBtn" onclick="toggleSort()"><span id="sortIcon">↑↓</span> Sort
+                        A→Z</button>
+                </div>
+                <div class="map-summary" id="mapSummary"></div>
+                <div id="cgrid" class="cgrid"></div>
+            </div>
+        </main>
+    </div>
+
+    <!-- AI PANEL -->
+    <button id="ai-btn" onclick="toggleAI()" title="AI Assistant">🤖</button>
+    <div id="ai-panel">
+        <div class="ai-hdr">
+            <div class="ai-hdr-l">
+                <div class="ai-ico-wrap">🤖<div class="ai-live"></div>
+                </div>
+                <div>
+                    <div class="ai-title">AI Assistant</div>
+                    <div class="ai-badge">Gemini Powered</div>
+                </div>
+            </div>
+            <button class="ai-close" onclick="toggleAI()">✕</button>
+        </div>
+        <div class="ai-body" id="ai-body">
+            <div class="ai-idle">
+                <div class="ai-big">✨</div>I can help you with interview prep! Ask me anything about placement
+                questions, technical concepts, or just type in the questions box and I'll auto-check your writing.
+            </div>
+            <div class="ai-section-lbl" style="margin-top:4px">💬 Chat</div>
+            <div class="ai-chat-msgs" id="chat-msgs"></div>
+        </div>
+        <div class="ai-input-row">
+            <input class="ai-input" id="ai-input" placeholder="Ask me anything..."
+                onkeydown="if(event.key==='Enter')sendChat()" />
+            <button class="ai-send" onclick="sendChat()">Send</button>
+        </div>
+    </div>
+
+    <div class="toast" id="toast"></div>
+
+    <script>
+        const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbye5QsdMeF7mPRiTi9Sb8RD0K1Lk1iKWeWd1nMI-cgMBoM4p_kNy3eRN_g77bZwo1Ld/exec';
+        const SHEET_ID = '1g_SoZt0oaqJ43B8Cfy8QfujagFnx_-H8uDcxcAP7VUo';
+        const GEMINI_KEY = 'AIzaSyCTqEpNYtOJfDUc1DfsYPyRDGUXnDSDkkc';
+        const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_KEY}`;
+
+        let dbOK = false, ME = '', FULLNAME = '', BATCH = '';
+        let LOCAL_DATA = JSON.parse(localStorage.getItem('bda_local') || '[]');
+        const VID = 'v_' + Math.random().toString(36).slice(2, 8);
+        let curStep = 0, extraRC = 0, mapData = [], mapSortAsc = true;
+        let aiDebounce = null, chatHistory = [];
+        let allSubmissions = []; // global store for Question Bank search
+        let userBatchMap = {};   // maps username → batch (fetched from Google Sheets)
+
+        // Auth guard
+        window.addEventListener('DOMContentLoaded', () => {
+            ME = sessionStorage.getItem('bda_me') || '';
+            if (!ME) { window.location.href = 'index.html'; return; }
+            FULLNAME = sessionStorage.getItem('bda_fullname') || cap(ME);
+            BATCH = sessionStorage.getItem('bda_batch') || '';
+            initBackend();
+            initPage();
+        });
+
+        function initBackend() {
+            dbOK = !!(APPS_SCRIPT_URL && APPS_SCRIPT_URL !== 'YOUR_APPS_SCRIPT_URL_HERE');
+        }
+
+        function initPage() {
+            // Header
+            document.getElementById('uname').textContent = FULLNAME;
+            document.getElementById('uav').textContent = FULLNAME[0].toUpperCase();
+            if (BATCH) { const bp = document.getElementById('bpill'); bp.textContent = BATCH; bp.style.display = ''; }
+            // Welcome banner
+            document.getElementById('wb-av').textContent = FULLNAME[0].toUpperCase();
+            document.getElementById('wb-name').textContent = FULLNAME;
+            if (BATCH) { const wb = document.getElementById('wb-batch'); wb.textContent = BATCH; wb.style.display = ''; }
+            // Pre-fill form
+            document.getElementById('fn').value = FULLNAME;
+            document.getElementById('batch-disp').textContent = BATCH || '—';
+            // Start services
+            regViewer(); renderViewers();
+            setInterval(regViewer, 20000); setInterval(renderViewers, 8000);
+            window.addEventListener('beforeunload', unregViewer);
+            loadStats();
+            if (!BATCH) fetchBatch();
+        }
+
+        async function fetchBatch() {
+            // Fetch batch directly from Google Sheets public CSV endpoint
+            try {
+                const csvUrl = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=Users`;
+                const res = await fetch(csvUrl);
+                const csv = await res.text();
+                const rows = csv.split('\n').map(row => {
+                    const cols = []; let cur = '', inQ = false;
+                    for (let i = 0; i < row.length; i++) {
+                        if (row[i] === '"') { inQ = !inQ; continue; }
+                        if (row[i] === ',' && !inQ) { cols.push(cur.trim()); cur = ''; continue; }
+                        cur += row[i];
+                    }
+                    cols.push(cur.trim());
+                    return cols;
+                });
+                // Build userBatchMap for ALL users and find current user's batch
+                rows.forEach(r => {
+                    if (r[0] && r[3] && r[0] !== 'Username') {
+                        userBatchMap[r[0].toLowerCase()] = r[3];
+                    }
+                });
+                // Also map fullName to batch for Question Bank display
+                rows.forEach(r => {
+                    if (r[2] && r[3] && r[2] !== 'Full Name') {
+                        userBatchMap[r[2].toLowerCase()] = r[3];
+                    }
+                });
+                const userRow = rows.find(r => r[0] && r[0].toLowerCase() === ME.toLowerCase());
+                if (userRow && userRow[3]) {
+                    BATCH = userRow[3];
+                    updateBatchUI();
+                    return;
+                }
+            } catch (e) { console.warn('Could not fetch batch from sheet:', e); }
+        }
+
+        function updateBatchUI() {
+            if (!BATCH) return;
+            sessionStorage.setItem('bda_batch', BATCH);
+            if (document.getElementById('bpill')) { document.getElementById('bpill').textContent = BATCH; document.getElementById('bpill').style.display = ''; }
+            if (document.getElementById('wb-batch')) { document.getElementById('wb-batch').textContent = BATCH; document.getElementById('wb-batch').style.display = ''; }
+            if (document.getElementById('batch-disp')) document.getElementById('batch-disp').textContent = BATCH;
+        }
+
+        async function callAPI(action, data = {}) {
+            if (action === 'getAll' || action === 'getViewers') {
+                const params = new URLSearchParams({ action });
+                const r = await fetch(`${APPS_SCRIPT_URL}?${params}`);
+                return await r.json();
+            } else {
+                const r = await fetch(APPS_SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action, ...data }) });
+                return await r.json();
+            }
+        }
+
+        function doLogout() {
+            unregViewer();
+            sessionStorage.removeItem('bda_me');
+            sessionStorage.removeItem('bda_fullname');
+            sessionStorage.removeItem('bda_batch');
+            window.location.href = 'index.html';
+        }
+
+        async function regViewer() {
+            localStorage.setItem('bdav_' + VID, JSON.stringify({ name: FULLNAME, ts: Date.now() }));
+            if (dbOK) { try { await callAPI('registerViewer', { name: FULLNAME }); } catch (e) { } }
+        }
+        function unregViewer() { localStorage.removeItem('bdav_' + VID); }
+        function getViewers() {
+            const now = Date.now(), out = [];
+            for (let i = 0; i < localStorage.length; i++) { const k = localStorage.key(i); if (k && k.startsWith('bdav_')) { try { const v = JSON.parse(localStorage.getItem(k)); if (now - v.ts < 45000) out.push(v); } catch (e) { } } }
+            return out;
+        }
+        function renderViewers() {
+            const vs = getViewers().filter(v => v.name && !v.name.toLowerCase().includes('admin'));
+            const unique = [...new Map(vs.map(v => [v.name, v])).values()];
+            const cnt = unique.length;
+            document.getElementById('hvc').textContent = cnt;
+            document.getElementById('sonline').textContent = cnt;
+            document.getElementById('vchips').innerHTML = unique.map(v => `<span class="vchip ${v.name === FULLNAME ? 'me' : ''}"><span class="vdot"></span>${v.name}${v.name === FULLNAME ? ' (you)' : ''}</span>`).join('');
+        }
+
+        async function loadStats() {
+            if (dbOK) { try { const r = await callAPI('getAll'); updateStats(r.data || []); } catch (e) { updateStats(LOCAL_DATA); } }
+            else updateStats(LOCAL_DATA);
+        }
+        function updateStats(data) {
+            const myCount = data.filter(x => x.submittedBy === ME).length;
+            document.getElementById('stotal').textContent = data.length;
+            document.getElementById('sco').textContent = new Set(data.map(x => x.company)).size;
+            document.getElementById('wb-sub').textContent = `You've shared ${myCount} experience${myCount !== 1 ? 's' : ''}`;
+        }
+
+        function goStep(n) {
+            if (n > curStep) { if (curStep === 0 && !v0()) return; if (curStep === 1 && !v1()) return; if (n === 3) buildReview(); }
+            const pcts = [0, 33, 66, 100];
+            document.getElementById('pfill').style.width = pcts[n] + '%';
+            for (let i = 0; i < 4; i++) { const nd = document.getElementById('sn' + i); nd.className = 'snode ' + (i < n ? 'done' : i === n ? 'active' : 'idle'); nd.querySelector('.snc').textContent = i < n ? '✓' : String(i + 1).padStart(2, '0'); }
+            document.querySelectorAll('.spanel').forEach((p, i) => p.classList.toggle('active', i === n));
+            curStep = n; window.scrollTo({ top: 80, behavior: 'smooth' });
+            if (n === 1 || n === 2) setTimeout(() => { if (!document.getElementById('ai-panel').classList.contains('open')) toggleAI(); }, 600);
+        }
+        function v0() { const e = document.getElementById('e0'); const ok = document.getElementById('fc').value.trim() && document.getElementById('fp').value.trim(); e.style.display = ok ? 'none' : 'block'; if (!ok) e.textContent = '❌ Please fill Company Name and Position.'; return ok; }
+        function v1() { const e = document.getElementById('e1'); const ok = document.getElementById('r1n').value.trim() && document.getElementById('r1q').value.trim(); e.style.display = ok ? 'none' : 'block'; if (!ok) e.textContent = '❌ Please enter round name and questions.'; return ok; }
+
+        function addExtraRound() {
+            document.getElementById('xempty')?.remove(); extraRC++;
+            const n = extraRC, box = document.getElementById('xrounds'), d = document.createElement('div');
+            d.className = 'rcard'; d.id = 'xr' + n;
+            d.innerHTML = `<div class="rcardh"><span class="rtag">ROUND ${n + 1}</span><button type="button" class="btn-del" onclick="document.getElementById('xr${n}').remove()">✕ Remove</button></div><div class="rfields"><div class="field"><label>Round Name</label><input class="fin" data-xrn="${n}" type="text" placeholder="e.g., Technical Round 2 / HR / System Design"/></div><div class="field"><label>Questions Asked</label><textarea class="fin" data-xrq="${n}" rows="5" placeholder="Write each question on a new line..." oninput="onQChange(this)"></textarea></div></div>`;
+            box.appendChild(d);
+        }
+
+        function buildReview() {
+            const name = document.getElementById('fn').value.trim(), co = document.getElementById('fc').value.trim(), pos = document.getElementById('fp').value.trim();
+            const r1n = document.getElementById('r1n').value.trim(), r1q = document.getElementById('r1q').value.trim();
+            const extras = []; document.querySelectorAll('#xrounds .rcard').forEach(c => { const rn = c.querySelector('[data-xrn]')?.value?.trim() || ''; const rq = c.querySelector('[data-xrq]')?.value?.trim() || ''; if (rn || rq) extras.push({ rn, rq }); });
+            const all = [{ rn: r1n, rq: r1q }, ...extras];
+            document.getElementById('rev').innerHTML = `<div class="rev-grid"><div class="rev-item"><div class="rev-lbl">Student</div><div class="rev-val">${name}</div></div><div class="rev-item"><div class="rev-lbl">Batch</div><div class="rev-val">${BATCH || '—'}</div></div><div class="rev-item"><div class="rev-lbl">Company</div><div class="rev-val">${co}</div></div><div class="rev-item"><div class="rev-lbl">Position</div><div class="rev-val">${pos}</div></div></div><hr class="dv"><div style="font-size:.68rem;color:var(--t2);font-family:var(--mono);margin-bottom:10px">${all.length} ROUND${all.length > 1 ? 'S' : ''} TO SUBMIT</div>${all.map((r, i) => `<div class="rev-round"><div class="rev-rn">// ROUND ${i + 1}: ${r.rn}</div><div class="rev-qs">${r.rq}</div></div>`).join('')}`;
+        }
+
+        async function doSubmit() {
+            const btn = document.getElementById('finalBtn'); btn.disabled = true; btn.textContent = '⏳ Saving...';
+            const entry = { id: 'INT_' + Date.now(), studentName: document.getElementById('fn').value.trim(), company: document.getElementById('fc').value.trim(), position: document.getElementById('fp').value.trim(), date: new Date().toISOString().slice(0, 10), rounds: collectRounds(), submittedBy: ME, submittedAt: new Date().toISOString() };
+            try {
+                if (dbOK) { const r = await callAPI('submit', { entry }); if (!r.success) throw new Error(r.error || 'Save failed'); }
+                else { LOCAL_DATA.push(entry); localStorage.setItem('bda_local', JSON.stringify(LOCAL_DATA)); }
+                toast('✅ Saved successfully!', 'ok');
+                ['fn', 'fc', 'fp', 'r1n', 'r1q'].forEach(id => document.getElementById(id).value = '');
+                document.getElementById('fn').value = FULLNAME;
+                document.getElementById('xrounds').innerHTML = `<div class="empty" style="padding:20px 0" id="xempty"><div class="eico" style="font-size:1.8rem">➕</div><p>Click "Add Round" to add more rounds</p></div>`;
+                extraRC = 0; loadStats(); goStep(0);
+                setTimeout(() => sw('all', document.getElementById('tbtn-a')), 800);
+            } catch (err) { toast('❌ ' + err.message, 'err'); }
+            finally { btn.disabled = false; btn.innerHTML = '🚀 Save to Database'; }
+        }
+        function collectRounds() { const rounds = [{ roundName: document.getElementById('r1n').value.trim(), questions: document.getElementById('r1q').value.trim() }]; document.querySelectorAll('#xrounds .rcard').forEach(c => { const rn = c.querySelector('[data-xrn]')?.value?.trim() || ''; const rq = c.querySelector('[data-xrq]')?.value?.trim() || ''; if (rn && rq) rounds.push({ roundName: rn, questions: rq }); }); return rounds; }
+
+        async function loadAndRenderAll() {
+            const el = document.getElementById('alist');
+            el.innerHTML = '<div class="loading"><div class="spinner"></div><br>Loading from database...</div>';
+            let data = [];
+            if (dbOK) { try { const r = await callAPI('getAll'); data = r.data || []; } catch (e) { data = LOCAL_DATA; } } else data = LOCAL_DATA;
+            allSubmissions = data;
+            document.getElementById('allc').textContent = data.length; updateStats(data);
+            // Populate role filter
+            const sel = document.getElementById('qbRoleFilter');
+            const roles = [...new Set(data.map(x => x.position).filter(Boolean))].sort();
+            const prev = sel.value;
+            sel.innerHTML = '<option value="">All Roles</option>' + roles.map(r => `<option value="${r}"${r === prev ? ' selected' : ''}>${r}</option>`).join('');
+            filterQuestionBank();
+            buildStudentMap(data);
+        }
+        function filterQuestionBank() {
+            const search = (document.getElementById('qbSearch').value || '').trim().toLowerCase();
+            const role = document.getElementById('qbRoleFilter').value;
+            let data = allSubmissions;
+            if (role) data = data.filter(x => x.position === role);
+            if (search) data = data.filter(x =>
+                (x.company || '').toLowerCase().includes(search) ||
+                (x.studentName || '').toLowerCase().includes(search) ||
+                (x.position || '').toLowerCase().includes(search) ||
+                (x.rounds || []).some(r => (r.questions || '').toLowerCase().includes(search) || (r.roundName || '').toLowerCase().includes(search))
+            );
+            const el = document.getElementById('alist');
+            document.getElementById('allc').textContent = data.length;
+            if (!data.length) { el.innerHTML = '<div class="empty"><div class="eico">📭</div><p>No submissions match your search.</p></div>'; return; }
+            data.sort((a, b) => new Date(b.submittedAt) - new Date(a.submittedAt));
+            el.innerHTML = data.map(x => {
+                const co1 = x.company ? x.company[0].toUpperCase() : '?';
+                const dt = x.date ? new Date(x.date + 'T00:00:00').toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) : x.date;
+                const stuBatch = userBatchMap[(x.studentName || '').toLowerCase()] || userBatchMap[(x.submittedBy || '').toLowerCase()] || '';
+                const stuLabel = stuBatch ? `${x.studentName} <span style="opacity:.6;font-size:.75rem">• ${stuBatch}</span>` : x.studentName;
+                return `<div class="ecard"><div class="etop"><div class="eco-wrap"><div class="eco-av">${co1}</div><div><div class="eco">${x.company}</div><div class="epos">${x.position}</div></div></div><div class="emeta"><div class="emeta-date">📅 ${dt}</div><div class="emeta-st"><div class="smav">${(x.studentName || '?')[0].toUpperCase()}</div>${stuLabel}</div></div></div><div class="round-acc">${x.rounds.map((r, i) => `<div class="round-item"><div class="round-hdr" onclick="toggleRound(this)"><span class="round-ttl">// ${r.roundName}</span><span class="round-tog">▼</span></div><div class="round-bdy"><div class="round-qs">${r.questions}</div></div></div>`).join('')}</div></div>`;
+            }).join('');
+        }
+        function toggleRound(hdr) { const bdy = hdr.nextElementSibling; const tog = hdr.querySelector('.round-tog'); bdy.classList.toggle('open'); tog.classList.toggle('open'); }
+
+        async function loadAndRenderMap() { const grid = document.getElementById('cgrid'); grid.innerHTML = '<div class="loading"><div class="spinner"></div><br>Loading...</div>'; let data = []; if (dbOK) { try { const r = await callAPI('getAll'); data = r.data || []; } catch (e) { data = LOCAL_DATA; } } else data = LOCAL_DATA; mapData = data; populateRoleFilter(data); applyMapFilters(); }
+        function populateRoleFilter(data) { const sel = document.getElementById('roleFilter'); const roles = [...new Set(data.map(x => x.position).filter(Boolean))].sort((a, b) => a.localeCompare(b)); const prev = sel.value; sel.innerHTML = '<option value="">All Job Roles</option>' + roles.map(r => `<option value="${r}"${r === prev ? ' selected' : ''}>${r}</option>`).join(''); }
+        function toggleSort() { mapSortAsc = !mapSortAsc; document.getElementById('sortBtn').innerHTML = `<span id="sortIcon">${mapSortAsc ? '↑↓' : '↓↑'}</span> Sort ${mapSortAsc ? 'A→Z' : 'Z→A'}`; applyMapFilters(); }
+        function applyMapFilters() { const search = (document.getElementById('mapSearch').value || '').trim().toLowerCase(); const role = document.getElementById('roleFilter').value; const cm = {}; mapData.forEach(x => { if (!x.company) return; if (role && x.position !== role) return; if (search && !x.company.toLowerCase().includes(search)) return; if (!cm[x.company]) cm[x.company] = { students: new Set(), roles: new Set() }; if (x.studentName) cm[x.company].students.add(x.studentName); if (x.position) cm[x.company].roles.add(x.position); }); let cos = Object.keys(cm).sort((a, b) => mapSortAsc ? a.localeCompare(b) : b.localeCompare(a)); const ts = new Set(); Object.values(cm).forEach(v => v.students.forEach(s => ts.add(s))); document.getElementById('mapSummary').innerHTML = `<div class="map-chip">🏢 Companies: <strong>${cos.length}</strong></div><div class="map-chip">👤 Students: <strong>${ts.size}</strong></div><div class="map-chip">📋 Submissions: <strong>${mapData.length}</strong></div>`; const grid = document.getElementById('cgrid'); if (!cos.length) { grid.innerHTML = '<div class="empty" style="grid-column:1/-1"><div class="eico">🏢</div><p>No companies found.</p></div>'; return; } grid.innerHTML = cos.map((co, idx) => { const info = cm[co]; const studs = [...info.students].sort((a, b) => a.localeCompare(b)); const roles = [...info.roles]; return `<div class="ccard" style="animation-delay:${idx * .04}s"><div class="ccard-head"><div class="ccard-co"><div class="ccard-ico">${co[0].toUpperCase()}</div><div class="ccard-name">${co}</div></div><div class="ccard-meta"><span class="ccard-badge">${studs.length} student${studs.length > 1 ? 's' : ''}</span>${roles.map(r => `<span class="ccard-role">${r}</span>`).join('')}</div></div><div class="ccard-body"><div class="ccard-lbl">// Students who attended</div><div class="student-chips">${studs.map(s => `<span class="schip"><span class="schip-av">${s[0].toUpperCase()}</span>${s}</span>`).join('')}</div></div></div>`; }).join(''); }
+        function buildStudentMap(data) { mapData = data; populateRoleFilter(data); applyMapFilters(); }
+
+        async function exportExcel() { toast('⏳ Preparing Excel...', 'ok'); let data = []; if (dbOK) { try { const r = await callAPI('getAll'); data = r.data || []; } catch (e) { data = LOCAL_DATA; } } else data = LOCAL_DATA; if (!data.length) { toast('No data to export.', 'err'); return; } data.sort((a, b) => new Date(a.submittedAt) - new Date(b.submittedAt)); const wb = XLSX.utils.book_new(); const s1 = [['#', 'Student', 'Company', 'Position', 'Date', 'Round', 'Questions', 'Submitted At']]; let row = 1; data.forEach(x => x.rounds.forEach(r => s1.push([row++, x.studentName, x.company, x.position, x.date, r.roundName, r.questions, x.submittedAt?.slice(0, 10) || '']))); const ws1 = XLSX.utils.aoa_to_sheet(s1); ws1['!cols'] = [{ wch: 4 }, { wch: 20 }, { wch: 18 }, { wch: 22 }, { wch: 14 }, { wch: 24 }, { wch: 70 }, { wch: 12 }]; XLSX.utils.book_append_sheet(wb, ws1, 'All Submissions'); const fname = 'BDA_Interview_Cell_' + new Date().toISOString().slice(0, 10) + '.xlsx'; XLSX.writeFile(wb, fname); toast('📊 Exported ' + data.length + ' entries', 'ok'); }
+
+        function sw(name, btn) {
+            document.querySelectorAll('.tab').forEach(b => b.classList.remove('active')); btn.classList.add('active');
+            ['submit', 'all', 'students'].forEach(t => document.getElementById('tab-' + t).classList.toggle('hidden', t !== name));
+            if (name === 'all') loadAndRenderAll(); if (name === 'students') loadAndRenderMap();
+        }
+
+        // ── AI ASSISTANT (Powered by Pollinations AI — Free, No API Key) ──
+        const POLLINATIONS_URL = 'https://text.pollinations.ai/';
+        function toggleAI() { const p = document.getElementById('ai-panel'); p.classList.toggle('open'); }
+        function onQChange(ta) { clearTimeout(aiDebounce); aiDebounce = setTimeout(() => analyzeText(ta.value), 1800); }
+
+        // Call Pollinations AI via GET endpoint (free, no API key, answers ANY question)
+        async function callLLM(messages, maxTokens = 400) {
+            try {
+                // Build a single prompt from messages
+                let prompt = '';
+                for (const m of messages) {
+                    if (m.role === 'system') prompt += m.content + '\n\n';
+                    else if (m.role === 'user') prompt += 'User: ' + m.content + '\n';
+                    else if (m.role === 'assistant') prompt += 'Assistant: ' + m.content + '\n';
+                }
+                prompt += 'Assistant:';
+                const encoded = encodeURIComponent(prompt);
+                const res = await fetch(POLLINATIONS_URL + encoded, { method: 'GET' });
+                if (!res.ok) return null;
+                const text = await res.text();
+                // Filter out deprecation notices
+                if (!text || !text.trim() || text.includes('IMPORTANT NOTICE') || text.includes('deprecated') || text.includes('api key')) return null;
+                return text.trim();
+            } catch (e) { console.warn('LLM call failed:', e); return null; }
+        }
+
+        // Smart local AI fallback — searches submissions + comprehensive tech knowledge
+        function localAI(question) {
+            const q = question.toLowerCase().trim();
+
+            // 1) Search actual interview submissions for company-specific queries
+            if (allSubmissions.length) {
+                // Check if asking about a specific company
+                const companyMatch = allSubmissions.find(s => q.includes(s.company.toLowerCase()));
+                if (companyMatch) {
+                    const coSubs = allSubmissions.filter(s => s.company.toLowerCase() === companyMatch.company.toLowerCase());
+                    const allQs = coSubs.flatMap(s => s.rounds.map(r => `\n[${r.roundName}] ${r.questions}`));
+                    return `🏢 **${companyMatch.company}** — Found ${coSubs.length} interview submission(s)!\n\nStudents interviewed: ${[...new Set(coSubs.map(s => s.studentName))].join(', ')}\nPositions: ${[...new Set(coSubs.map(s => s.position))].join(', ')}\n\n📝 Questions asked:${allQs.join('')}\n\n💡 Tip: Click the "Question Bank" tab and search for "${companyMatch.company}" to see full details.`;
+                }
+
+                // Check if asking about roles/positions
+                const roleMatch = allSubmissions.find(s => q.includes(s.position.toLowerCase()));
+                if (roleMatch) {
+                    const roleSubs = allSubmissions.filter(s => s.position.toLowerCase() === roleMatch.position.toLowerCase());
+                    const companies = [...new Set(roleSubs.map(s => s.company))];
+                    return `🎯 **${roleMatch.position}** — Found ${roleSubs.length} interview(s) for this role!\n\nCompanies: ${companies.join(', ')}\nStudents: ${[...new Set(roleSubs.map(s => s.studentName))].join(', ')}\n\n💡 Click "Question Bank" tab and filter by this role to see all questions.`;
+                }
+
+                // Check for general queries about submissions
+                if (q.includes('how many') || q.includes('total') || q.includes('count') || q.includes('stats')) {
+                    const companies = [...new Set(allSubmissions.map(s => s.company))];
+                    const students = [...new Set(allSubmissions.map(s => s.studentName))];
+                    return `📊 Database Statistics:\n• Total submissions: ${allSubmissions.length}\n• Companies covered: ${companies.length} (${companies.slice(0, 5).join(', ')}${companies.length > 5 ? '...' : ''})\n• Students contributed: ${students.length}\n\nUse the Question Bank tab to explore all submissions!`;
+                }
+            }
+
+            // 2) Comprehensive tech knowledge base (unrestricted)
+            const kb = {
+                // Databases
+                'rdbms,relational database': 'RDBMS (Relational Database Management System) stores data in structured tables with rows and columns. Examples: MySQL, PostgreSQL, Oracle, SQL Server, SQLite. Uses SQL for queries and enforces ACID properties for reliable transactions. Key concepts: Primary keys, foreign keys, normalization, indexing, joins, views, stored procedures.',
+                'sql,structured query': 'SQL (Structured Query Language) is used for managing relational databases. DML: SELECT, INSERT, UPDATE, DELETE. DDL: CREATE, ALTER, DROP, TRUNCATE. DCL: GRANT, REVOKE. TCL: COMMIT, ROLLBACK. Advanced: Window functions, CTEs, subqueries, CASE statements, GROUP BY, HAVING, UNION.',
+                'nosql,mongodb,no sql,document database': 'NoSQL databases handle unstructured/semi-structured data. Types: Document (MongoDB, CouchDB), Key-Value (Redis, DynamoDB), Column-family (Cassandra, HBase), Graph (Neo4j, Amazon Neptune). Use when: flexible schema needed, horizontal scaling, high throughput, real-time apps.',
+                'normalization,1nf,2nf,3nf,bcnf,normal form': 'Database Normalization reduces redundancy:\n• 1NF: Atomic values, no repeating groups\n• 2NF: 1NF + no partial dependencies\n• 3NF: 2NF + no transitive dependencies\n• BCNF: Every determinant is a candidate key\n• 4NF: No multi-valued dependencies\nDenormalization: Adding controlled redundancy for performance.',
+                'acid': 'ACID properties ensure reliable transactions:\n• Atomicity: All-or-nothing execution\n• Consistency: Data remains valid\n• Isolation: Concurrent transactions don\'t interfere\n• Durability: Committed data persists after failure\nImplemented via locks, WAL (Write-Ahead Logging), MVCC.',
+                'index,indexing': 'Database indexing speeds up data retrieval using B-tree, B+tree, Hash, or Bitmap structures.\n• Clustered: Reorders data (1 per table)\n• Non-clustered: Separate pointer structure\n• Composite: Multiple columns\n• Covering: Includes all query columns\nTrade-off: Faster reads, slower writes, extra storage.',
+                'join,sql join': 'SQL JOINs combine tables:\n• INNER JOIN: Matching rows only\n• LEFT JOIN: All left + matching right\n• RIGHT JOIN: All right + matching left\n• FULL OUTER JOIN: All rows from both\n• CROSS JOIN: Cartesian product\n• SELF JOIN: Table joined with itself\n• NATURAL JOIN: Auto-match same-name columns',
+                'star schema,snowflake schema,dimension,fact table': 'Data warehouse schemas:\n• Star Schema: Central fact table + denormalized dimensions (simple, fast)\n• Snowflake Schema: Normalized dimensions (less redundancy, more joins)\n• Galaxy Schema: Multiple fact tables sharing dimensions\nFact tables store metrics; dimension tables store attributes.',
+                'oltp,olap': 'OLTP vs OLAP:\n• OLTP: Transactional, normalized, current data, fast CRUD\n• OLAP: Analytical, denormalized, historical data, complex queries\n• HTAP: Hybrid combining both\nExamples: OLTP (MySQL, PostgreSQL), OLAP (Snowflake, Redshift, BigQuery)',
+                'scd,slowly changing dimension': 'SCD handles dimension changes over time:\n• Type 0: Retain original (no updates)\n• Type 1: Overwrite (no history)\n• Type 2: Add new row with dates/versions (full history)\n• Type 3: Add column for previous value\n• Type 4: Separate history table\n• Type 6: Hybrid of 1+2+3',
+                'partition,partitioning': 'Data partitioning strategies:\n• Range: By value ranges (dates, IDs)\n• List: By specific values\n• Hash: By hash function\n• Composite: Combination\nBenefits: Query pruning, parallel processing, maintenance.\nIn Spark: repartition(), coalesce(). In SQL: PARTITION BY.',
+
+                // Big Data & Data Engineering
+                'hadoop,hdfs,mapreduce': 'Apache Hadoop ecosystem:\n• HDFS: Distributed file storage (blocks, NameNode, DataNode)\n• MapReduce: Batch processing paradigm\n• YARN: Resource management\n• Hive: SQL-on-Hadoop\n• Pig: Data flow scripting\n• HBase: Column-family NoSQL on HDFS\n• Zookeeper: Coordination service',
+                'spark,pyspark,apache spark': 'Apache Spark — unified analytics engine:\n• 100x faster than MapReduce (in-memory)\n• APIs: RDD, DataFrame, Dataset, SQL\n• Components: Spark Core, SQL, MLlib, GraphX, Streaming\n• PySpark: Python API\n• Key concepts: Transformations (lazy), Actions (trigger), DAG, Catalyst optimizer\n• Optimization: Broadcast, partitioning, caching, AQE',
+                'kafka,event streaming': 'Apache Kafka — distributed streaming platform:\n• Topics, Partitions, Producers, Consumers\n• Consumer Groups for parallel processing\n• Retention: Time or size based\n• Exactly-once semantics, at-least-once delivery\n• Kafka Streams, Kafka Connect, KSQL\n• Use cases: Real-time pipelines, event sourcing, log aggregation',
+                'etl,elt,data pipeline': 'ETL/ELT patterns:\n• ETL: Extract → Transform → Load (traditional)\n• ELT: Extract → Load → Transform (modern cloud)\n• Tools: Apache Airflow, dbt, Informatica, Talend, AWS Glue\n• Orchestration: DAGs, dependencies, scheduling\n• Data quality: Validation, deduplication, reconciliation\n• Monitoring: SLAs, alerting, lineage tracking',
+                'data lake,data warehouse,lakehouse': 'Data storage architectures:\n• Data Lake: Raw data, schema-on-read (S3, ADLS, GCS)\n• Data Warehouse: Processed data, schema-on-write (Snowflake, Redshift, BigQuery)\n• Data Lakehouse: Combined — raw storage + warehouse features (Databricks, Delta Lake)\n• Data Mesh: Domain-oriented decentralized architecture',
+                'delta lake,delta table,iceberg': 'Table formats for data lakes:\n• Delta Lake: ACID transactions, time travel, schema evolution (Databricks)\n• Apache Iceberg: Hidden partitioning, schema evolution (Netflix)\n• Apache Hudi: Upserts, incremental processing (Uber)\nAll provide: ACID guarantees, partition evolution, time travel on data lakes.',
+                'snowflake cloud,snowflake warehouse': 'Snowflake cloud data warehouse:\n• Separates compute from storage\n• Auto-scaling, virtual warehouses\n• Zero-copy cloning, time travel\n• Secure data sharing, data marketplace\n• Supports structured + semi-structured (JSON, Parquet)\n• Snowpipe for streaming ingestion',
+                'airflow,orchestration': 'Apache Airflow — workflow orchestration:\n• DAGs (Directed Acyclic Graphs) define workflows\n• Operators: BashOperator, PythonOperator, custom\n• Scheduling with cron expressions\n• XComs for task communication\n• Connections & Hooks for external systems\n• UI for monitoring, retries, backfills',
+                'dbt,data build tool': 'dbt (data build tool) — transforms data in warehouses:\n• SQL-based transformations with Jinja\n• Models, sources, seeds, snapshots\n• Testing & documentation built-in\n• Incremental models for efficiency\n• Works with Snowflake, BigQuery, Redshift, Databricks',
+
+                // Cloud
+                'aws,amazon web services': 'AWS core services:\n• Compute: EC2, Lambda, ECS/EKS\n• Storage: S3, EBS, EFS\n• Database: RDS, DynamoDB, Redshift\n• Data: Glue, EMR, Kinesis, Athena\n• ML: SageMaker\n• Networking: VPC, CloudFront, Route53\n• IAM for security & access control',
+                'azure,microsoft azure': 'Azure core services:\n• Compute: VMs, Azure Functions, AKS\n• Storage: Blob, ADLS Gen2, Files\n• Data: Synapse Analytics, Data Factory, Databricks\n• Database: SQL Database, Cosmos DB\n• ML: Azure ML\n• Integration: Event Hubs, Service Bus',
+                'gcp,google cloud': 'Google Cloud services:\n• Compute: Compute Engine, Cloud Functions, GKE\n• Storage: Cloud Storage, Filestore\n• Data: BigQuery, Dataflow, Dataproc, Pub/Sub\n• Database: Cloud SQL, Spanner, Firestore, Bigtable\n• ML: Vertex AI\n• All tightly integrated with open-source (Kubernetes, TensorFlow)',
+
+                // Programming
+                'python,oops,object oriented': 'Python OOP:\n• Classes & Objects, __init__ constructor\n• Inheritance (single, multiple, MRO)\n• Polymorphism (method overriding/overloading)\n• Encapsulation (_private, __name_mangling)\n• Abstraction (ABC, abstract methods)\n• Magic methods: __str__, __repr__, __len__, __eq__\n• Decorators, generators, context managers',
+                'java,jdk,jvm': 'Java core concepts:\n• OOP: Classes, interfaces, abstract classes\n• Collections: List, Set, Map, Queue\n• Multithreading, concurrency, synchronized\n• JVM architecture: ClassLoader, JIT, GC\n• Exception handling: try-catch-finally\n• Java 8+: Streams, Lambda, Optional, CompletableFuture\n• Spring Boot for enterprise applications',
+                'javascript,js,typescript,node': 'JavaScript/TypeScript:\n• Event loop, async/await, Promises\n• Closures, prototypes, classes\n• DOM manipulation, event handling\n• Node.js: Server-side JS, npm ecosystem\n• TypeScript: Static typing for JS\n• Frameworks: React, Angular, Vue, Express\n• ES6+: Destructuring, spread, modules',
+                'react,angular,vue,frontend': 'Frontend frameworks:\n• React: Component-based, Virtual DOM, Hooks, Redux\n• Angular: Full framework, TypeScript, RxJS, DI\n• Vue: Progressive, reactive, Composition API\n• State management: Redux, Zustand, Pinia\n• Styling: CSS-in-JS, Tailwind, Sass\n• Testing: Jest, Cypress, Playwright',
+                'c++,cpp,c language': 'C/C++ concepts:\n• Pointers, references, memory management\n• OOP: Virtual functions, polymorphism, templates\n• STL: Vectors, maps, sets, algorithms\n• Smart pointers: unique_ptr, shared_ptr\n• Multithreading: std::thread, mutex\n• Compile process: Preprocessing, compilation, linking',
+                'pandas,numpy,matplotlib': 'Python data libraries:\n• Pandas: DataFrames, groupby, merge, pivot, apply\n• NumPy: Arrays, vectorized operations, broadcasting\n• Matplotlib/Seaborn: Visualization\n• Scikit-learn: ML algorithms, pipelines\n• Best for: EDA, data cleaning, feature engineering',
+                'decorator,python decorator': 'Python decorators wrap functions to extend behavior:\n• Syntax: @decorator_name\n• Built-in: @property, @staticmethod, @classmethod\n• Popular: @login_required, @cache, @retry\n• Implementation: Functions returning functions\n• Can accept arguments, stack multiple decorators\n• Used for: logging, auth, caching, validation',
+                'git,version control,github': 'Git version control:\n• Commands: clone, add, commit, push, pull, merge\n• Branching: feature branches, merge vs rebase\n• Workflows: GitFlow, trunk-based, forking\n• Conflict resolution, cherry-pick, stash\n• GitHub: PRs, Issues, Actions (CI/CD)\n• Best practices: Meaningful commits, .gitignore, branch protection',
+                'linux,bash,shell,command': 'Linux/Shell essentials:\n• Navigation: ls, cd, pwd, find, locate\n• Files: cat, grep, awk, sed, head, tail\n• Permissions: chmod, chown, umask\n• Processes: ps, top, kill, nohup, &\n• Networking: ssh, scp, curl, wget, netstat\n• Scripting: Bash, variables, loops, functions, cron',
+
+                // ML/AI
+                'machine learning,ml,ai,artificial intelligence': 'Machine Learning overview:\n• Supervised: Regression, Classification (SVM, RF, XGBoost)\n• Unsupervised: Clustering (K-means), Dimensionality (PCA)\n• Deep Learning: Neural Networks, CNN, RNN, Transformers\n• Evaluation: Accuracy, Precision, Recall, F1, AUC-ROC\n• Pipeline: Data → Features → Train → Evaluate → Deploy',
+                'deep learning,neural network,cnn,rnn,transformer': 'Deep Learning architectures:\n• CNN: Image recognition, convolution + pooling\n• RNN/LSTM/GRU: Sequence data, text, time series\n• Transformers: Attention mechanism, BERT, GPT\n• GANs: Generative models\n• Frameworks: TensorFlow, PyTorch, Keras\n• Transfer learning, fine-tuning, embeddings',
+                'nlp,natural language processing': 'NLP concepts:\n• Tokenization, stemming, lemmatization\n• TF-IDF, Word2Vec, GloVe embeddings\n• Transformers: BERT, GPT, T5\n• Tasks: Sentiment, NER, summarization, translation\n• LLMs: Prompt engineering, RAG, fine-tuning\n• Libraries: NLTK, SpaCy, Hugging Face',
+
+                // DevOps & System Design
+                'docker,container,kubernetes,k8s': 'Containers & Orchestration:\n• Docker: Images, containers, Dockerfile, docker-compose\n• Kubernetes: Pods, Deployments, Services, ConfigMaps\n• Container registry: DockerHub, ECR, ACR\n• Orchestration: Scaling, load balancing, self-healing\n• CI/CD: Jenkins, GitHub Actions, GitLab CI',
+                'api,rest,graphql,microservices': 'API & Architecture:\n• REST: HTTP methods, status codes, CRUD, stateless\n• GraphQL: Query language, schema, resolvers\n• gRPC: Protocol Buffers, high-performance\n• Microservices: Decoupled services, API gateway\n• Auth: OAuth2, JWT, API keys\n• Rate limiting, pagination, versioning',
+                'system design,scalability,load balancer': 'System Design concepts:\n• Horizontal vs vertical scaling\n• Load balancing: Round-robin, least connections\n• Caching: Redis, Memcached, CDN\n• Database: Sharding, replication, CAP theorem\n• Message queues: Kafka, RabbitMQ, SQS\n• Patterns: CQRS, Event Sourcing, Circuit Breaker',
+
+                // Data Structures & Algorithms
+                'dsa,data structure,algorithm,sorting': 'DSA essentials:\n• Arrays, Linked Lists, Stacks, Queues\n• Trees: BST, AVL, Heap, Trie\n• Graphs: BFS, DFS, Dijkstra, topological sort\n• Sorting: Quick, Merge, Heap, Counting\n• Searching: Binary search, hashing\n• DP: Memoization, tabulation\n• Complexity: Big O, space/time analysis',
+
+                // Interview tips
+                'introduce,tell me about yourself': 'Self-introduction tips:\n1. Start with name + education\n2. Mention relevant skills/technologies\n3. Highlight 1-2 key projects with impact\n4. Express career interest + why this role\n5. Keep it under 2 minutes\n6. Be confident and structured',
+                'project,explain project': 'How to present a project:\n1. Problem statement / objective\n2. Tech stack and why you chose it\n3. Architecture / data flow\n4. Your specific contributions\n5. Results / metrics achieved\n6. Challenges and how you solved them',
+                'help,what can you do': 'I\'m your Interview Prep Assistant! I can help with:\n\n📚 **Technologies**: SQL, Python, Java, JavaScript, C++, and more\n🛠️ **Data Engineering**: Spark, Hadoop, Kafka, ETL, Airflow, dbt\n☁️ **Cloud**: AWS, Azure, GCP\n🧠 **ML/AI**: Deep Learning, NLP, Computer Vision\n🏢 **Company Questions**: Search past interviews by company name\n🎯 **Interview Tips**: Self-intro, project explanation, HR questions\n\nExamples: "what is rdbms", "SBI Life Insurance questions", "explain kafka"'
+            };
+
+            // Match against knowledge base
+            for (const [keys, answer] of Object.entries(kb)) {
+                if (keys.split(',').some(k => q.includes(k.trim()))) return answer;
+            }
+
+            // Generic helpful response
+            return `Great question! Here are some ways I can help:\n\n🔍 **Search interviews**: Type a company name (e.g., "SBI Life Insurance")\n📚 **Tech topics**: Ask about any technology, language, or concept\n🎯 **Interview prep**: "tell me about yourself", "explain project"\n📊 **Stats**: "how many submissions", "total companies"\n\nI cover: SQL, Python, Java, JavaScript, C++, Spark, Hadoop, Kafka, ETL, AWS, Azure, GCP, ML/AI, Docker, Kubernetes, System Design, DSA, and much more!\n\nTip: Try rephrasing with specific keywords like the technology name.`;
+        }
+
+        async function analyzeText(text) {
+            if (!text || text.trim().length < 20) return;
+            const co = document.getElementById('fc').value.trim() || 'the company';
+            const pos = document.getElementById('fp').value.trim() || 'the position';
+            const body = document.getElementById('ai-body');
+            body.innerHTML = `<div class="ai-thinking"><div class="ai-dot"></div><div class="ai-dot"></div><div class="ai-dot"></div><span style="color:#7c3aed;margin-left:4px">Analyzing...</span></div>`;
+            if (!document.getElementById('ai-panel').classList.contains('open')) document.getElementById('ai-panel').classList.add('open');
+            try {
+                let parsed = null;
+                // Try real LLM (Pollinations AI — free, no API key)
+                const prompt = `You are an AI assistant helping a student document their interview experience at "${co}" for "${pos}". Analyze this text and respond in JSON with exactly these keys: "grammar" (string: brief feedback on writing quality, or "Looks good! No issues found." if fine), "followups" (array of 3 likely follow-up interview questions based on the topics mentioned). Text: """${text}"""`;
+                const raw = await callLLM([{ role: 'user', content: prompt }]);
+                if (raw) {
+                    try { parsed = JSON.parse(raw.replace(/```json|```/g, '').trim()); } catch (e) { parsed = { grammar: raw.slice(0, 300), followups: [] }; }
+                }
+                // Fallback: local analysis
+                if (!parsed) {
+                    const words = text.split(/\s+/);
+                    const sentences = text.split(/[.!?]+/).filter(s => s.trim());
+                    let grammarMsg = 'Looks good! No issues found.';
+                    if (words.length < 10) grammarMsg = 'Your response seems quite short. Try adding more detail about the questions asked and your experience.';
+                    else if (sentences.some(s => s.trim() && s.trim()[0] !== s.trim()[0].toUpperCase())) grammarMsg = 'Consider capitalizing the first letter of each sentence for better readability.';
+                    else if (text.includes('  ')) grammarMsg = 'There are some extra spaces in your text. Consider cleaning them up.';
+                    // Generate follow-up questions based on keywords
+                    const followups = [];
+                    const topics = { 'sql': 'What types of SQL joins were discussed and can you explain with examples?', 'python': 'Were you asked about Python data structures or OOP concepts?', 'spark': 'Did they ask about Spark optimization techniques like partitioning or caching?', 'hadoop': 'Were there questions about HDFS architecture or MapReduce?', 'etl': 'What tools/frameworks did they ask about for building ETL pipelines?', 'project': 'What challenges did they focus on regarding your project?', 'data': 'Were there questions about data modeling or schema design?', 'cloud': 'Did they ask about any specific cloud services (AWS/Azure/GCP)?', 'machine learning': 'Were there questions about ML model evaluation metrics?', 'database': 'Did they ask about database normalization or indexing strategies?' };
+                    const lw = text.toLowerCase();
+                    for (const [key, question] of Object.entries(topics)) {
+                        if (lw.includes(key) && followups.length < 3) followups.push(question);
+                    }
+                    while (followups.length < 3) {
+                        const generic = ['Can you elaborate on the difficulty level of the questions?', 'Were there any behavioral or HR questions?', 'How long was each interview round?', 'Were you asked about system design concepts?', 'Did they ask about your previous experience or internships?'];
+                        followups.push(generic[followups.length]);
+                    }
+                    parsed = { grammar: grammarMsg, followups };
+                }
+                const isOk = parsed.grammar?.toLowerCase().includes('good') || parsed.grammar?.toLowerCase().includes('no issue');
+                body.innerHTML = `
+      <div><div class="ai-section-lbl">✏️ Grammar Check</div><div class="ai-bubble ${isOk ? 'ok' : ''}">${parsed.grammar || 'Analysis complete.'}</div></div>
+      ${parsed.followups?.length ? `<div><div class="ai-section-lbl">💡 Likely Follow-up Questions</div><div style="display:flex;flex-direction:column;gap:5px">${parsed.followups.map(q => `<div class="ai-followup" onclick="appendQ('${q.replace(/'/g, "\\\'")}')">  ${q}</div>`).join('')}</div></div>` : ''}
+      <div class="ai-section-lbl" style="margin-top:4px">💬 Ask me anything</div>
+      <div class="ai-chat-msgs" id="chat-msgs"></div>`;
+            } catch (e) { body.innerHTML = `<div class="ai-bubble">⚠️ AI error: ${e.message}</div>`; }
+        }
+
+        function appendQ(q) { const ta = document.getElementById('r1q'); ta.value = (ta.value ? ta.value + '\n' : '') + q; ta.focus(); }
+
+        async function sendChat() {
+            const inp = document.getElementById('ai-input'); const q = inp.value.trim(); if (!q) return; inp.value = '';
+            let msgs = document.getElementById('chat-msgs');
+            if (!msgs) { const body = document.getElementById('ai-body'); body.innerHTML = '<div class="ai-section-lbl">💬 Chat</div><div class="ai-chat-msgs" id="chat-msgs"></div>'; msgs = document.getElementById('chat-msgs'); }
+            msgs.innerHTML += `<div class="chat-user">${q}</div>`; msgs.scrollTop = msgs.scrollHeight;
+            chatHistory.push({ role: 'user', parts: [{ text: q }] });
+            // Show thinking indicator
+            const thinkId = 'think_' + Date.now();
+            msgs.innerHTML += `<div class="chat-ai" id="${thinkId}"><em>Thinking...</em></div>`; msgs.scrollTop = msgs.scrollHeight;
+            let reply = '';
+            try {
+                // Use local AI FIRST (instant, always works)
+                reply = localAI(q);
+                // Then try real LLM to enhance the answer (bonus)
+                const co = document.getElementById('fc').value.trim() || 'a company';
+                const pos = document.getElementById('fp').value.trim() || 'a role';
+                const sysMsg = { role: 'system', content: `You are a helpful AI interview prep assistant for BDA students preparing for placement. Answer any question concisely. Student is interviewing at "${co}" for "${pos}".` };
+                const chatMsgs = chatHistory.map(m => ({ role: m.role === 'model' ? 'assistant' : 'user', content: m.parts[0].text }));
+                const llmReply = await callLLM([sysMsg, ...chatMsgs], 500);
+                if (llmReply) { reply = llmReply; } // Override with real LLM if available
+                chatHistory.push({ role: 'model', parts: [{ text: reply }] });
+                const thinkEl = document.getElementById(thinkId);
+                if (thinkEl) thinkEl.innerHTML = reply.replace(/\n/g, '<br>');
+                msgs.scrollTop = msgs.scrollHeight;
+            } catch (e) {
+                if (!reply) reply = localAI(q);
+                chatHistory.push({ role: 'model', parts: [{ text: reply }] });
+                const thinkEl = document.getElementById(thinkId);
+                if (thinkEl) thinkEl.innerHTML = reply.replace(/\n/g, '<br>');
+            }
+        }
+
+        function cap(s) { return s ? s.charAt(0).toUpperCase() + s.slice(1) : s; }
+        function toast(msg, type) { const t = document.getElementById('toast'); t.textContent = msg; t.className = `toast ${type} show`; setTimeout(() => t.classList.remove('show'), 3500); }
+    </script>
+
+</body>
+
+</html>
