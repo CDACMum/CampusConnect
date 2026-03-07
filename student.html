@@ -2322,19 +2322,29 @@
                 // Data Structures & Algorithms
                 'dsa,data structure,algorithm,sorting': 'DSA essentials:\n• Arrays, Linked Lists, Stacks, Queues\n• Trees: BST, AVL, Heap, Trie\n• Graphs: BFS, DFS, Dijkstra, topological sort\n• Sorting: Quick, Merge, Heap, Counting\n• Searching: Binary search, hashing\n• DP: Memoization, tabulation\n• Complexity: Big O, space/time analysis',
 
-                // Interview tips
-                'introduce,tell me about yourself': 'Self-introduction tips:\n1. Start with name + education\n2. Mention relevant skills/technologies\n3. Highlight 1-2 key projects with impact\n4. Express career interest + why this role\n5. Keep it under 2 minutes\n6. Be confident and structured',
-                'project,explain project': 'How to present a project:\n1. Problem statement / objective\n2. Tech stack and why you chose it\n3. Architecture / data flow\n4. Your specific contributions\n5. Results / metrics achieved\n6. Challenges and how you solved them',
-                'help,what can you do': 'I\'m your Interview Prep Assistant! I can help with:\n\n📚 **Technologies**: SQL, Python, Java, JavaScript, C++, and more\n🛠️ **Data Engineering**: Spark, Hadoop, Kafka, ETL, Airflow, dbt\n☁️ **Cloud**: AWS, Azure, GCP\n🧠 **ML/AI**: Deep Learning, NLP, Computer Vision\n🏢 **Company Questions**: Search past interviews by company name\n🎯 **Interview Tips**: Self-intro, project explanation, HR questions\n\nExamples: "what is rdbms", "SBI Life Insurance questions", "explain kafka"'
+                // 2b) Interview & Behavioral
             };
+            const b = {
+                'tell me about yourself,intro,introduce': 'A good self-introduction:\n1. Keep it professional and under 2 minutes.\n2. Present: Role, course, current focus.\n3. Past: Relevant internships or projects.\n4. Future: Why this company/role?\nFormula: "I am a [Course] student skilled in [Tech]. Recently I built a project using [Tech] where I [Impact]. I want to join [Company] because [Reason]."',
+                'weakness,strength,weaknesses,strengths': 'Behavioral tips:\n• Weakness: Choose a real but non-critical flaw (e.g., getting too deep into details before seeing big picture) AND explain how you are actively overcoming it.\n• Strength: Align with the role (problem-solving, fast learning) and provide a concrete STORY/EXAMPLE to prove it.',
+                'project,explain project,my project': 'Explaining projects (STAR method):\n• Situation: What was the goal/problem?\n• Task: What was your specific role?\n• Action: HOW did you build it? What tech? Focus on your decisions and problem-solving.\n• Result: What was the outcome? (Metrics, speed, accuracy, user count).',
+                'question for us,any questions,ask me': 'Questions to ask the interviewer:\n• "What does a typical day look like for this role?"\n• "What is the tech stack your team currently works with?"\n• "What are the most exciting challenges your team is currently facing?"\n• "How does performance evaluation work for freshers here?"',
+                '5 vs of big data,what is big data': 'The 5 V\'s of Big Data are:\n1. Volume: massive amounts of data\n2. Velocity: speed of generation/processing\n3. Variety: structured, semi-structured, unstructured\n4. Veracity: trustworthiness/quality of data\n5. Value: business insights derived.\nSome add Variability and Visualization.',
+                'array vs linked list,dsa,data structure': 'Data Structure tradeoffs:\n• Array: Fast O(1) reads, contiguous memory, but slow O(n) insertions/deletions.\n• Linked List: Dynamic size, fast O(1) insert/delete at known nodes, but slow O(n) random access (no index).\nUse Arrays when reading often; Linked Lists when modifying size frequently.',
+            };
+            Object.assign(kb, b);
 
-            // Match against knowledge base
-            for (const [keys, answer] of Object.entries(kb)) {
-                if (keys.split(',').some(k => q.includes(k.trim()))) return answer;
+            for (const [keys, val] of Object.entries(kb)) {
+                const keywordArray = keys.split(',').map(k => k.trim());
+                // Exact phrase match: User typed "explain neural networks please" -> includes "neural network"
+                if (keywordArray.some(k => q.includes(k))) return val;
+
+                // Partial query match: User typed "neural net" -> "neural network" includes "neural net"
+                if (q.length > 4 && keywordArray.some(k => k.includes(q))) return val;
             }
 
             // Generic helpful response
-            return `Great question! Here are some ways I can help:\n\n🔍 **Search interviews**: Type a company name (e.g., "SBI Life Insurance")\n📚 **Tech topics**: Ask about any technology, language, or concept\n🎯 **Interview prep**: "tell me about yourself", "explain project"\n📊 **Stats**: "how many submissions", "total companies"\n\nI cover: SQL, Python, Java, JavaScript, C++, Spark, Hadoop, Kafka, ETL, AWS, Azure, GCP, ML/AI, Docker, Kubernetes, System Design, DSA, and much more!\n\nTip: Try rephrasing with specific keywords like the technology name.`;
+            return `Great question! Here are some ways I can help:\n\n🔍 **Search interviews**: Type a company name (e.g., "SBI Life Insurance")\n📚 **Tech topics**: Ask about any technology, language, or concept (e.g., "SQL joins", "Big Data", "React")\n🎯 **Interview prep**: "tell me about yourself", "explain project"\n📊 **Stats**: "how many submissions", "total companies"\n\nI cover: SQL, Python, Java, JavaScript, Big Data tools, Cloud, ML, DevOps, System Design, and much more!`;
         }
 
         async function analyzeText(text) {
