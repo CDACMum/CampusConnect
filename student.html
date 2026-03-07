@@ -2200,7 +2200,40 @@
         async function loadAndRenderMap() { const grid = document.getElementById('cgrid'); grid.innerHTML = '<div class="loading"><div class="spinner"></div><br>Loading...</div>'; let data = []; if (dbOK) { try { const r = await callAPI('getAll'); data = r.data || []; } catch (e) { data = LOCAL_DATA; } } else data = LOCAL_DATA; mapData = data; populateRoleFilter(data); applyMapFilters(); }
         function populateRoleFilter(data) { const sel = document.getElementById('roleFilter'); const roles = [...new Set(data.map(x => x.position).filter(Boolean))].sort((a, b) => a.localeCompare(b)); const prev = sel.value; sel.innerHTML = '<option value="">All Job Roles</option>' + roles.map(r => `<option value="${r}"${r === prev ? ' selected' : ''}>${r}</option>`).join(''); }
         function toggleSort() { mapSortAsc = !mapSortAsc; document.getElementById('sortBtn').innerHTML = `<span id="sortIcon">${mapSortAsc ? '↑↓' : '↓↑'}</span> Sort ${mapSortAsc ? 'A→Z' : 'Z→A'}`; applyMapFilters(); }
-        function applyMapFilters() { const search = (document.getElementById('mapSearch').value || '').trim().toLowerCase(); const role = document.getElementById('roleFilter').value; const cm = {}; mapData.forEach(x => { if (!x.company) return; if (role && x.position !== role) return; if (search && !x.company.toLowerCase().includes(search)) return; if (!cm[x.company]) cm[x.company] = { students: new Set(), roles: new Set() }; if (x.studentName) cm[x.company].students.add(x.studentName); if (x.position) cm[x.company].roles.add(x.position); }); let cos = Object.keys(cm).sort((a, b) => mapSortAsc ? a.localeCompare(b) : b.localeCompare(a)); const ts = new Set(); Object.values(cm).forEach(v => v.students.forEach(s => ts.add(s))); document.getElementById('mapSummary').innerHTML = `<div class="map-chip">🏢 Companies: <strong>${cos.length}</strong></div><div class="map-chip">👤 Students: <strong>${ts.size}</strong></div><div class="map-chip">📋 Submissions: <strong>${mapData.length}</strong></div>`; const grid = document.getElementById('cgrid'); if (!cos.length) { grid.innerHTML = '<div class="empty" style="grid-column:1/-1"><div class="eico">🏢</div><p>No companies found.</p></div>'; return; } grid.innerHTML = cos.map((co, idx) => { const info = cm[co]; const studs = [...info.students].sort((a, b) => a.localeCompare(b)); const roles = [...info.roles]; return `<div class="ccard" style="animation-delay:${idx * .04}s"><div class="ccard-head"><div class="ccard-co"><div class="ccard-ico">${co[0].toUpperCase()}</div><div class="ccard-name">${co}</div></div><div class="ccard-meta"><span class="ccard-badge">${studs.length} student${studs.length > 1 ? 's' : ''}</span>${roles.map(r => `<span class="ccard-role">${r}</span>`).join('')}</div></div><div class="ccard-body"><div class="ccard-lbl">// Students who attended</div><div class="student-chips">${studs.map(s => `<span class="schip"><span class="schip-av">${s[0].toUpperCase()}</span>${s}</span>`).join('')}</div></div></div>`; }).join(''); }
+        function applyMapFilters() {
+            const search = (document.getElementById('mapSearch').value || '').trim().toLowerCase();
+            const role = document.getElementById('roleFilter').value;
+            const cm = {};
+            mapData.forEach(x => {
+                if (!x.company) return;
+                if (role && x.position !== role) return;
+                if (search && !x.company.toLowerCase().includes(search)) return;
+                if (!cm[x.company]) cm[x.company] = { students: new Set(), roles: new Set() };
+                if (x.studentName) cm[x.company].students.add(x.studentName);
+                if (x.position) cm[x.company].roles.add(x.position);
+            });
+            let cos = Object.keys(cm).sort((a, b) => mapSortAsc ? a.localeCompare(b) : b.localeCompare(a));
+            const ts = new Set(); Object.values(cm).forEach(v => v.students.forEach(s => ts.add(s)));
+            document.getElementById('mapSummary').innerHTML = `<div class="map-chip">🏢 Companies: <strong>${cos.length}</strong></div><div class="map-chip">👤 Students: <strong>${ts.size}</strong></div><div class="map-chip">📋 Submissions: <strong>${mapData.length}</strong></div>`;
+            const grid = document.getElementById('cgrid');
+            if (!cos.length) { grid.innerHTML = '<div class="empty" style="grid-column:1/-1"><div class="eico">🏢</div><p>No companies found.</p></div>'; return; }
+            grid.innerHTML = cos.map((co, idx) => {
+                const info = cm[co];
+                const studs = [...info.students].sort((a, b) => a.localeCompare(b));
+                const roles = [...info.roles];
+                return `<div class="ccard" style="animation-delay:${idx * .04}s"><div class="ccard-head"><div class="ccard-co"><div class="ccard-ico">${co[0].toUpperCase()}</div><div class="ccard-name">${co}</div></div><div class="ccard-meta"><button onclick="viewCompanyQuestions('${co.replace(/'/g, "\\'")}')" style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: var(--t1); border-radius: 20px; padding: 4px 10px; font-size: 0.7rem; cursor: pointer; transition: all 0.2s; margin-right: 8px; display: flex; align-items: center; gap: 4px;" onmouseover="this.style.background='rgba(255,255,255,0.1)';this.style.borderColor='rgba(255,255,255,0.2)'" onmouseout="this.style.background='rgba(255,255,255,0.05)';this.style.borderColor='rgba(255,255,255,0.1)'">🔍 View Questions</button><span class="ccard-badge">${studs.length} student${studs.length > 1 ? 's' : ''}</span>${roles.map(r => `<span class="ccard-role">${r}</span>`).join('')}</div></div><div class="ccard-body"><div class="ccard-lbl">// STUDENTS WHO ATTENDED</div><div class="student-chips">${studs.map(s => {
+                    const b = userBatchMap[s.toLowerCase()];
+                    return `<span class="schip"><span class="schip-av">${s[0].toUpperCase()}</span>${s}${b ? ` <span style="opacity:0.6;font-size:0.75rem;margin-left:4px;font-style:italic">(${b})</span>` : ''}</span>`;
+                }).join('')}</div></div></div>`;
+            }).join('');
+        }
+
+        function viewCompanyQuestions(company) {
+            document.getElementById('qbSearch').value = company;
+            sw('all', document.getElementById('tbtn-a'));
+            window.scrollTo({ top: 80, behavior: 'smooth' });
+        }
+
         function buildStudentMap(data) { mapData = data; populateRoleFilter(data); applyMapFilters(); }
 
         async function exportExcel() { toast('⏳ Preparing Excel...', 'ok'); let data = []; if (dbOK) { try { const r = await callAPI('getAll'); data = r.data || []; } catch (e) { data = LOCAL_DATA; } } else data = LOCAL_DATA; if (!data.length) { toast('No data to export.', 'err'); return; } data.sort((a, b) => new Date(a.submittedAt) - new Date(b.submittedAt)); const wb = XLSX.utils.book_new(); const s1 = [['#', 'Student', 'Company', 'Position', 'Date', 'Round', 'Questions', 'Submitted At']]; let row = 1; data.forEach(x => x.rounds.forEach(r => s1.push([row++, x.studentName, x.company, x.position, x.date, r.roundName, r.questions, x.submittedAt?.slice(0, 10) || '']))); const ws1 = XLSX.utils.aoa_to_sheet(s1); ws1['!cols'] = [{ wch: 4 }, { wch: 20 }, { wch: 18 }, { wch: 22 }, { wch: 14 }, { wch: 24 }, { wch: 70 }, { wch: 12 }]; XLSX.utils.book_append_sheet(wb, ws1, 'All Submissions'); const fname = 'BDA_Interview_Cell_' + new Date().toISOString().slice(0, 10) + '.xlsx'; XLSX.writeFile(wb, fname); toast('📊 Exported ' + data.length + ' entries', 'ok'); }
@@ -2322,19 +2355,29 @@
                 // Data Structures & Algorithms
                 'dsa,data structure,algorithm,sorting': 'DSA essentials:\n• Arrays, Linked Lists, Stacks, Queues\n• Trees: BST, AVL, Heap, Trie\n• Graphs: BFS, DFS, Dijkstra, topological sort\n• Sorting: Quick, Merge, Heap, Counting\n• Searching: Binary search, hashing\n• DP: Memoization, tabulation\n• Complexity: Big O, space/time analysis',
 
-                // Interview tips
-                'introduce,tell me about yourself': 'Self-introduction tips:\n1. Start with name + education\n2. Mention relevant skills/technologies\n3. Highlight 1-2 key projects with impact\n4. Express career interest + why this role\n5. Keep it under 2 minutes\n6. Be confident and structured',
-                'project,explain project': 'How to present a project:\n1. Problem statement / objective\n2. Tech stack and why you chose it\n3. Architecture / data flow\n4. Your specific contributions\n5. Results / metrics achieved\n6. Challenges and how you solved them',
-                'help,what can you do': 'I\'m your Interview Prep Assistant! I can help with:\n\n📚 **Technologies**: SQL, Python, Java, JavaScript, C++, and more\n🛠️ **Data Engineering**: Spark, Hadoop, Kafka, ETL, Airflow, dbt\n☁️ **Cloud**: AWS, Azure, GCP\n🧠 **ML/AI**: Deep Learning, NLP, Computer Vision\n🏢 **Company Questions**: Search past interviews by company name\n🎯 **Interview Tips**: Self-intro, project explanation, HR questions\n\nExamples: "what is rdbms", "SBI Life Insurance questions", "explain kafka"'
+                // 2b) Interview & Behavioral
             };
+            const b = {
+                'tell me about yourself,intro,introduce': 'A good self-introduction:\n1. Keep it professional and under 2 minutes.\n2. Present: Role, course, current focus.\n3. Past: Relevant internships or projects.\n4. Future: Why this company/role?\nFormula: "I am a [Course] student skilled in [Tech]. Recently I built a project using [Tech] where I [Impact]. I want to join [Company] because [Reason]."',
+                'weakness,strength,weaknesses,strengths': 'Behavioral tips:\n• Weakness: Choose a real but non-critical flaw (e.g., getting too deep into details before seeing big picture) AND explain how you are actively overcoming it.\n• Strength: Align with the role (problem-solving, fast learning) and provide a concrete STORY/EXAMPLE to prove it.',
+                'project,explain project,my project': 'Explaining projects (STAR method):\n• Situation: What was the goal/problem?\n• Task: What was your specific role?\n• Action: HOW did you build it? What tech? Focus on your decisions and problem-solving.\n• Result: What was the outcome? (Metrics, speed, accuracy, user count).',
+                'question for us,any questions,ask me': 'Questions to ask the interviewer:\n• "What does a typical day look like for this role?"\n• "What is the tech stack your team currently works with?"\n• "What are the most exciting challenges your team is currently facing?"\n• "How does performance evaluation work for freshers here?"',
+                '5 vs of big data,what is big data': 'The 5 V\'s of Big Data are:\n1. Volume: massive amounts of data\n2. Velocity: speed of generation/processing\n3. Variety: structured, semi-structured, unstructured\n4. Veracity: trustworthiness/quality of data\n5. Value: business insights derived.\nSome add Variability and Visualization.',
+                'array vs linked list,dsa,data structure': 'Data Structure tradeoffs:\n• Array: Fast O(1) reads, contiguous memory, but slow O(n) insertions/deletions.\n• Linked List: Dynamic size, fast O(1) insert/delete at known nodes, but slow O(n) random access (no index).\nUse Arrays when reading often; Linked Lists when modifying size frequently.',
+            };
+            Object.assign(kb, b);
 
-            // Match against knowledge base
-            for (const [keys, answer] of Object.entries(kb)) {
-                if (keys.split(',').some(k => q.includes(k.trim()))) return answer;
+            for (const [keys, val] of Object.entries(kb)) {
+                const keywordArray = keys.split(',').map(k => k.trim());
+                // Exact phrase match: User typed "explain neural networks please" -> includes "neural network"
+                if (keywordArray.some(k => q.includes(k))) return val;
+
+                // Partial query match: User typed "neural net" -> "neural network" includes "neural net"
+                if (q.length > 4 && keywordArray.some(k => k.includes(q))) return val;
             }
 
             // Generic helpful response
-            return `Great question! Here are some ways I can help:\n\n🔍 **Search interviews**: Type a company name (e.g., "SBI Life Insurance")\n📚 **Tech topics**: Ask about any technology, language, or concept\n🎯 **Interview prep**: "tell me about yourself", "explain project"\n📊 **Stats**: "how many submissions", "total companies"\n\nI cover: SQL, Python, Java, JavaScript, C++, Spark, Hadoop, Kafka, ETL, AWS, Azure, GCP, ML/AI, Docker, Kubernetes, System Design, DSA, and much more!\n\nTip: Try rephrasing with specific keywords like the technology name.`;
+            return `Great question! Here are some ways I can help:\n\n🔍 **Search interviews**: Type a company name (e.g., "SBI Life Insurance")\n📚 **Tech topics**: Ask about any technology, language, or concept (e.g., "SQL joins", "Big Data", "React")\n🎯 **Interview prep**: "tell me about yourself", "explain project"\n📊 **Stats**: "how many submissions", "total companies"\n\nI cover: SQL, Python, Java, JavaScript, Big Data tools, Cloud, ML, DevOps, System Design, and much more!`;
         }
 
         async function analyzeText(text) {
